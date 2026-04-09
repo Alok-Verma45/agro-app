@@ -1,0 +1,36 @@
+# ========================
+# Backend (Spring Boot)
+# ========================
+agro-app-server/target/
+agro-app-server/*.log
+
+# ========================
+# IDE Files
+# ========================
+.idea/
+*.iml
+.vscode/
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Environment / Secrets
+# ========================
+.env
+*.env
+
+# ========================
+# Frontend (future React)
+# ========================
+agro-app-client/node_modules/
+agro-app-client/build/
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
