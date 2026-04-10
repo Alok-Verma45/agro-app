@@ -2,13 +2,15 @@
 # Backend (Spring Boot)
 # ========================
 agro-app-server/target/
-agro-app-server/*.log
+*.log
 
 # ========================
 # IDE Files
 # ========================
 .idea/
 *.iml
+*.iws
+*.ipr
 .vscode/
 
 # ========================
@@ -33,4 +35,3 @@ agro-app-client/build/
 # Logs
 # ========================
 logs/
-*.log
