@@ -60,7 +60,7 @@ agro-app/
 ## ⚙️ Setup Instructions
 
 ### 1. Clone the repository
-git clone https://github.com/your-username/agro-app.git
+git clone https://github.com/Alok-Verma45/agro-app.git
 
 ### 2. Backend Setup
 - Navigate to `agro-app-server`
