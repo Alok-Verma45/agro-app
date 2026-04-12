@@ -1,5 +1,6 @@
 package com.alok.agroapp.service;
 
+import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 
 import java.util.List;
@@ -13,5 +14,7 @@ public interface CreditService {
     List<Credit> getCreditsByCustomer(Long customerId);
 
     Credit addPayment(Long creditId, Double amount);
+
+    DashboardResponse getDashboardData();
 
 }

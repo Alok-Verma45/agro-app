@@ -1,5 +1,6 @@
 package com.alok.agroapp.controller;
 
+import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 import com.alok.agroapp.service.CreditService;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +41,10 @@ public class CreditController {
     public Credit addPayment(@PathVariable Long creditId,
                              @RequestParam Double amount) {
         return creditService.addPayment(creditId, amount);
+    }
+
+    @GetMapping("/dashboard")
+    public DashboardResponse getDashboard() {
+        return creditService.getDashboardData();
     }
 }

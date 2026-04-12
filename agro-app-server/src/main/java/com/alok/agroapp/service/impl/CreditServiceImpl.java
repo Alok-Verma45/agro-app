@@ -1,5 +1,6 @@
 package com.alok.agroapp.service.impl;
 
+import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 import com.alok.agroapp.repository.CreditRepository;
 import com.alok.agroapp.repository.CustomerRepository;
@@ -70,5 +71,19 @@ public class CreditServiceImpl implements CreditService {
         }
 
         return creditRepository.save(credit);
+    }
+
+    @Override
+    public DashboardResponse getDashboardData() {
+
+        Double totalCredit = creditRepository.getTotalCreditAmount();
+        Double totalPaid = creditRepository.getTotalPaidAmount();
+        Double totalPending = creditRepository.getTotalPendingAmount();
+
+        return DashboardResponse.builder()
+                .totalCredit(totalCredit)
+                .totalPaid(totalPaid)
+                .totalPending(totalPending)
+                .build();
     }
 }
