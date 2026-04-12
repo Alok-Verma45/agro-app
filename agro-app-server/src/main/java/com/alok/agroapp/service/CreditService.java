@@ -20,4 +20,6 @@ public interface CreditService {
 
     List<CustomerPendingResponse> getCustomerPending();
 
+    List<CustomerPendingResponse> getTopCustomers();
+
 }

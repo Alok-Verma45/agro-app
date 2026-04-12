@@ -53,4 +53,9 @@ public class CreditController {
     public List<CustomerPendingResponse> getCustomerPending() {
         return creditService.getCustomerPending();
     }
+
+    @GetMapping("/top-customers")
+    public List<CustomerPendingResponse> getTopCustomers() {
+        return creditService.getTopCustomers();
+    }
 }

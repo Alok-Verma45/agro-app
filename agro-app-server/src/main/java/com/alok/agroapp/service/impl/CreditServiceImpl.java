@@ -100,4 +100,17 @@ public class CreditServiceImpl implements CreditService {
                 ))
                 .toList();
     }
+
+    @Override
+    public List<CustomerPendingResponse> getTopCustomers() {
+
+        List<Object[]> data = creditRepository.getTopCustomersByPending();
+
+        return data.stream()
+                .map(obj -> new CustomerPendingResponse(
+                        (String) obj[0],
+                        ((Number) obj[1]).doubleValue()
+                ))
+                .toList();
+    }
 }

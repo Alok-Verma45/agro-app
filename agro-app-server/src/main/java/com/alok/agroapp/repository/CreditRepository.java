@@ -22,4 +22,10 @@ public interface CreditRepository extends JpaRepository<Credit, Long> {
             "FROM Credit c " +
             "GROUP BY c.customer.name")
     List<Object[]> getCustomerWisePending();
+
+    @Query("SELECT c.customer.name, SUM(c.pendingAmount) " +
+            "FROM Credit c " +
+            "GROUP BY c.customer.name " +
+            "ORDER BY SUM(c.pendingAmount) DESC")
+    List<Object[]> getTopCustomersByPending();
 }
