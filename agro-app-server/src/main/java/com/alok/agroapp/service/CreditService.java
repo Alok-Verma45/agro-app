@@ -1,5 +1,6 @@
 package com.alok.agroapp.service;
 
+import com.alok.agroapp.dto.CustomerPendingResponse;
 import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 
@@ -16,5 +17,7 @@ public interface CreditService {
     Credit addPayment(Long creditId, Double amount);
 
     DashboardResponse getDashboardData();
+
+    List<CustomerPendingResponse> getCustomerPending();
 
 }

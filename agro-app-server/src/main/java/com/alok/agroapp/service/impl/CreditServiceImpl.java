@@ -1,5 +1,6 @@
 package com.alok.agroapp.service.impl;
 
+import com.alok.agroapp.dto.CustomerPendingResponse;
 import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 import com.alok.agroapp.repository.CreditRepository;
@@ -85,5 +86,18 @@ public class CreditServiceImpl implements CreditService {
                 .totalPaid(totalPaid)
                 .totalPending(totalPending)
                 .build();
+    }
+
+    @Override
+    public List<CustomerPendingResponse> getCustomerPending() {
+
+        List<Object[]> data = creditRepository.getCustomerWisePending();
+
+        return data.stream()
+                .map(obj -> new CustomerPendingResponse(
+                        (String) obj[0],
+                        ((Number) obj[1]).doubleValue()
+                ))
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.alok.agroapp.controller;
 
+import com.alok.agroapp.dto.CustomerPendingResponse;
 import com.alok.agroapp.dto.DashboardResponse;
 import com.alok.agroapp.entity.Credit;
 import com.alok.agroapp.service.CreditService;
@@ -46,5 +47,10 @@ public class CreditController {
     @GetMapping("/dashboard")
     public DashboardResponse getDashboard() {
         return creditService.getDashboardData();
+    }
+
+    @GetMapping("/customer-pending")
+    public List<CustomerPendingResponse> getCustomerPending() {
+        return creditService.getCustomerPending();
     }
 }

@@ -17,4 +17,9 @@ public interface CreditRepository extends JpaRepository<Credit, Long> {
 
     @Query("SELECT COALESCE(SUM(c.pendingAmount), 0) FROM Credit c")
     Double getTotalPendingAmount();
+
+    @Query("SELECT c.customer.name, SUM(c.pendingAmount) " +
+            "FROM Credit c " +
+            "GROUP BY c.customer.name")
+    List<Object[]> getCustomerWisePending();
 }
