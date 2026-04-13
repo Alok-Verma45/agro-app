@@ -22,6 +22,16 @@ public class CreditController {
     @PostMapping("/{customerId}")
     public Credit createCredit(@PathVariable Long customerId,
                                @RequestBody Credit credit) {
+
+        // ✅ VALIDATIONS (VERY IMPORTANT)
+        if (credit.getProduct() == null || credit.getProduct().getId() == null) {
+            throw new RuntimeException("Product is required");
+        }
+
+        if (credit.getQuantity() == null || credit.getQuantity() <= 0) {
+            throw new RuntimeException("Quantity must be greater than 0");
+        }
+
         return creditService.createCredit(customerId, credit);
     }
 

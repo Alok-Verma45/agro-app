@@ -20,11 +20,21 @@ public class Credit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔗 Many credits → One customer
+    // 🔗 Customer
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    // 🔗 Product (NEW 🔥)
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    // 📦 Quantity (NEW 🔥)
+    @Column(nullable = false)
+    private Integer quantity;
+
+    // 💰 Amounts
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
@@ -44,10 +54,16 @@ public class Credit {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
 
-        // auto calculate pending
+        // 🔥 AUTO CALCULATE TOTAL (BEST PRACTICE)
+        if (product != null && quantity != null) {
+            this.totalAmount = product.getPrice()
+                    .multiply(BigDecimal.valueOf(quantity));
+        }
+
+        // pending
         this.pendingAmount = totalAmount.subtract(paidAmount);
 
-        // auto set status
+        // status
         if (pendingAmount.compareTo(BigDecimal.ZERO) == 0) {
             this.status = CreditStatus.PAID;
         } else {
