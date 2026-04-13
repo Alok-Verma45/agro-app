@@ -1,6 +1,7 @@
 package com.alok.agroapp.repository;
 
 import com.alok.agroapp.entity.Credit;
+import com.alok.agroapp.entity.enums.CreditStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -8,6 +9,10 @@ import java.util.List;
 
 public interface CreditRepository extends JpaRepository<Credit, Long> {
     List<Credit> findByCustomerId(Long customerId);
+
+    boolean existsByCustomerIdAndStatus(Long customerId,
+                                        CreditStatus status);
+    void deleteByCustomerId(Long customerId);
 
     @Query("SELECT COALESCE(SUM(c.totalAmount), 0) FROM Credit c")
     Double getTotalCreditAmount();

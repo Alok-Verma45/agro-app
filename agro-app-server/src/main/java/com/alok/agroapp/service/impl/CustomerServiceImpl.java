@@ -1,19 +1,25 @@
 package com.alok.agroapp.service.impl;
 
 import com.alok.agroapp.entity.Customer;
+import com.alok.agroapp.entity.enums.CreditStatus;
+import com.alok.agroapp.repository.CreditRepository;
 import com.alok.agroapp.repository.CustomerRepository;
 import com.alok.agroapp.service.CustomerService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Transactional
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CreditRepository creditRepository;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, CreditRepository creditRepository) {
         this.customerRepository = customerRepository;
+        this.creditRepository = creditRepository;
     }
 
     @Override
@@ -45,9 +51,21 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomer(Long id) {
-        Customer existing = customerRepository.findById(id)
+
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        customerRepository.delete(existing);
+        boolean hasPending = creditRepository
+                .existsByCustomerIdAndStatus(id, CreditStatus.PENDING);
+
+        if (hasPending) {
+            throw new RuntimeException("Cannot delete customer with pending credits");
+        }
+
+        // 🔥 delete all credits first
+        creditRepository.deleteByCustomerId(id);
+
+        // then delete customer
+        customerRepository.delete(customer);
     }
 }
