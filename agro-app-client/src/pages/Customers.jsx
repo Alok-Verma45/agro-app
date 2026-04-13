@@ -65,13 +65,11 @@ function Customers() {
   };
 
   const handleDeleteCustomer = async (id) => {
-    const confirmDelete = confirm("Are you sure?");
-    if (!confirmDelete) return;
+    if (!confirm("Are you sure?")) return;
 
     try {
       await deleteCustomer(id);
       fetchCustomers();
-
       setToast("Customer deleted");
       setTimeout(() => setToast(""), 2000);
     } catch (error) {
@@ -93,20 +91,22 @@ function Customers() {
   const filteredCustomers = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search),
+      c.phone.includes(search)
   );
 
   return (
     <div className="p-6">
+      {/* 🔍 Search */}
       <input
         type="text"
         placeholder="Search by name or phone..."
-        className="border p-2 rounded mb-4 w-full"
+        className="border p-3 rounded-xl mb-6 w-full shadow-sm focus:ring-2 focus:ring-green-400 outline-none"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      {/* Table */}
-      <div className="bg-white p-6 rounded-xl shadow">
+
+      {/* 📦 Card */}
+      <div className="bg-white p-6 rounded-2xl shadow-md border">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Customers</h1>
 
@@ -116,57 +116,73 @@ function Customers() {
               setEditingId(null);
               setForm({ name: "", phone: "", address: "" });
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl shadow"
           >
             + Add Customer
           </button>
         </div>
 
-        <table className="w-full border-separate border-spacing-y-2">
-          <thead>
-            <tr className="text-gray-600 text-left">
-              <th className="p-3">Name</th>
-              <th className="p-3">Phone</th>
-              <th className="p-3">Address</th>
-              <th className="p-3">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredCustomers.map((c) => (
-              <tr
-                key={c.id}
-                className="bg-white shadow-sm hover:shadow-md transition rounded-lg"
-              >
-                <td className="p-3 rounded-l-lg font-medium">{c.name}</td>
-                <td className="p-3">{c.phone}</td>
-                <td className="p-3 text-gray-600">{c.address}</td>
-
-                <td className="p-3 rounded-r-lg flex gap-2">
-                  <button
-                    onClick={() => handleEditCustomer(c)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteCustomer(c.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+        {/* Table */}
+        {filteredCustomers.length === 0 ? (
+          <p className="text-center text-gray-500 py-10">
+            No customers found 😕
+          </p>
+        ) : (
+          <table className="w-full table-fixed border-separate border-spacing-y-3">
+            <thead>
+              <tr className="text-gray-500 text-sm uppercase">
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Address</th>
+                <th className="p-3 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredCustomers.map((c) => (
+                <tr
+                  key={c.id}
+                  className="bg-white shadow-sm hover:shadow-md hover:scale-[1.01] transition rounded-lg"
+                >
+                  {/* ✅ FIXED ALIGNMENT */}
+                  <td className="p-3 rounded-l-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white font-bold">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium">{c.name}</span>
+                    </div>
+                  </td>
+
+                  <td className="p-3">{c.phone}</td>
+                  <td className="p-3 text-gray-600">{c.address}</td>
+
+                  <td className="p-3 rounded-r-lg flex gap-2">
+                    <button
+                      onClick={() => handleEditCustomer(c)}
+                      className="bg-blue-500/90 hover:bg-blue-600 text-white px-3 py-1 rounded-lg shadow"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteCustomer(c.id)}
+                      className="bg-red-500/90 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {/* Modal Form */}
+      {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-[400px]">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+          <div className="bg-white p-6 rounded-2xl shadow-lg w-[400px]">
             <h2 className="text-xl font-semibold mb-4">
               {editingId ? "Edit Customer" : "Add Customer"}
             </h2>
@@ -176,21 +192,27 @@ function Customers() {
                 className="border p-2 rounded focus:ring-2 focus:ring-green-400"
                 placeholder="Name"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
               />
 
               <input
                 className="border p-2 rounded focus:ring-2 focus:ring-green-400"
                 placeholder="Phone"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value })
+                }
               />
 
               <input
                 className="border p-2 rounded focus:ring-2 focus:ring-green-400"
                 placeholder="Address"
                 value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, address: e.target.value })
+                }
               />
             </div>
 
@@ -213,6 +235,8 @@ function Customers() {
           </div>
         </div>
       )}
+
+      {/* Toast */}
       {toast && (
         <div className="fixed bottom-5 right-5 bg-black text-white px-4 py-2 rounded shadow">
           {toast}
