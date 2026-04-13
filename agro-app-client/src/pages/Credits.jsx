@@ -1,21 +1,25 @@
 import { useEffect, useState } from "react";
 import { getCredits, addCredit, addPayment } from "../api/creditApi";
 import { getCustomers } from "../api/customerApi";
+import { getProducts } from "../api/productApi";
 
 function Credits() {
   const [credits, setCredits] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [toast, setToast] = useState("");
 
   const [form, setForm] = useState({
     customerId: "",
-    totalAmount: "",
+    productId: "",
+    quantity: "",
     paidAmount: "",
   });
 
   useEffect(() => {
     fetchCredits();
     fetchCustomers();
+    fetchProducts();
   }, []);
 
   const fetchCredits = async () => {
@@ -36,21 +40,33 @@ function Credits() {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      const res = await getProducts();
+      setProducts(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ✅ ADD CREDIT (FIXED)
   const handleAddCredit = async () => {
-    if (!form.customerId || !form.totalAmount) {
-      alert("Customer & Total Amount required");
+    if (!form.customerId || !form.productId || !form.quantity) {
+      alert("Customer, Product & Quantity required");
       return;
     }
 
     try {
       await addCredit(form.customerId, {
-        totalAmount: Number(form.totalAmount),
+        product: { id: Number(form.productId) }, // 🔥 IMPORTANT FIX
+        quantity: Number(form.quantity),
         paidAmount: Number(form.paidAmount || 0),
       });
 
       setForm({
         customerId: "",
-        totalAmount: "",
+        productId: "",
+        quantity: "",
         paidAmount: "",
       });
 
@@ -63,15 +79,13 @@ function Credits() {
     }
   };
 
-  // ✅ PAYMENT LOGIC (MAIN FIX)
+  // ✅ PAYMENT
   const handlePay = async (credit) => {
     const amount = prompt("Enter payment amount");
-
     if (!amount || isNaN(amount)) return;
 
     try {
       await addPayment(credit.id, Number(amount));
-
       setToast("Payment added 💰");
       fetchCredits();
       setTimeout(() => setToast(""), 2000);
@@ -81,7 +95,7 @@ function Credits() {
     }
   };
 
-  // ⭐ SORT BY HIGHEST PENDING
+  // ✅ SORT (TOP PENDING FIRST)
   const sortedCredits = [...credits].sort(
     (a, b) => b.pendingAmount - a.pendingAmount
   );
@@ -93,19 +107,20 @@ function Credits() {
         Credits <span className="text-gray-500">(Udhar)</span>
       </h1>
 
-      {/* Form */}
+      {/* FORM */}
       <div className="bg-white p-6 rounded-2xl shadow-md border mb-6">
         <h2 className="text-lg font-semibold mb-4">Add Credit</h2>
 
         <div className="flex gap-4 mb-4">
+          {/* Customer */}
           <select
-            className="border p-3 rounded-xl w-full focus:ring-2 focus:ring-green-400"
+            className="border p-3 rounded-xl w-full"
             value={form.customerId}
             onChange={(e) =>
               setForm({ ...form, customerId: e.target.value })
             }
           >
-            <option value="">Select Customer</option>
+            <option value="">Customer</option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -113,19 +128,37 @@ function Credits() {
             ))}
           </select>
 
+          {/* Product */}
+          <select
+            className="border p-3 rounded-xl w-full"
+            value={form.productId}
+            onChange={(e) =>
+              setForm({ ...form, productId: e.target.value })
+            }
+          >
+            <option value="">Product</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} (₹{p.price})
+              </option>
+            ))}
+          </select>
+
+          {/* Quantity */}
           <input
             type="number"
-            placeholder="Total Amount"
+            placeholder="Qty"
             className="border p-3 rounded-xl w-full"
-            value={form.totalAmount}
+            value={form.quantity}
             onChange={(e) =>
-              setForm({ ...form, totalAmount: e.target.value })
+              setForm({ ...form, quantity: e.target.value })
             }
           />
 
+          {/* Paid */}
           <input
             type="number"
-            placeholder="Paid Amount (optional)"
+            placeholder="Paid (optional)"
             className="border p-3 rounded-xl w-full"
             value={form.paidAmount}
             onChange={(e) =>
@@ -142,7 +175,7 @@ function Credits() {
         </button>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="bg-white p-6 rounded-2xl shadow-md border">
         <h2 className="text-lg font-semibold mb-4">All Credits</h2>
 
@@ -155,6 +188,8 @@ function Credits() {
             <thead>
               <tr className="text-gray-500 text-sm uppercase">
                 <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Product</th>
+                <th className="p-3 text-left">Qty</th>
                 <th className="p-3 text-left">Total</th>
                 <th className="p-3 text-left">Paid</th>
                 <th className="p-3 text-left">Pending</th>
@@ -171,14 +206,16 @@ function Credits() {
                     index === 0 ? "bg-red-50 font-semibold" : ""
                   }`}
                 >
-                  {/* Customer */}
                   <td className="p-3 rounded-l-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-500 text-white font-bold">
-                        {c.customer?.name?.charAt(0).toUpperCase()}
-                      </div>
-                      <span>{c.customer?.name}</span>
-                    </div>
+                    {c.customer?.name}
+                  </td>
+
+                  <td className="p-3">
+                    {c.product?.name}
+                  </td>
+
+                  <td className="p-3">
+                    {c.quantity}
                   </td>
 
                   <td className="p-3 text-blue-600 font-medium">
@@ -193,7 +230,6 @@ function Credits() {
                     ₹{c.pendingAmount}
                   </td>
 
-                  {/* Status */}
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 rounded text-sm font-semibold ${
@@ -206,12 +242,11 @@ function Credits() {
                     </span>
                   </td>
 
-                  {/* ✅ PAY BUTTON */}
                   <td className="p-3 rounded-r-lg">
                     {c.status !== "PAID" && (
                       <button
                         onClick={() => handlePay(c)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg shadow"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg"
                       >
                         Pay
                       </button>
