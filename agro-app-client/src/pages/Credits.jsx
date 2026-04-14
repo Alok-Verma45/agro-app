@@ -84,7 +84,7 @@ function Credits() {
       {/* Heading */}
       <h1 className="text-2xl font-bold mb-6 
         text-gray-800 dark:text-white">
-        Credits <span className="text-gray-500">(Udhar)</span>
+        Credits <span className="text-gray-500">(Udhar/Paid)</span>
       </h1>
 
       {/* FORM */}
