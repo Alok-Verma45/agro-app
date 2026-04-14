@@ -25,12 +25,8 @@ function Customers() {
   }, []);
 
   const fetchCustomers = async () => {
-    try {
-      const res = await getCustomers();
-      setCustomers(res.data);
-    } catch (error) {
-      console.error(error);
-    }
+    const res = await getCustomers();
+    setCustomers(res.data);
   };
 
   const handleAddCustomer = async () => {
@@ -56,8 +52,7 @@ function Customers() {
       fetchCustomers();
 
       setTimeout(() => setToast(""), 2000);
-    } catch (error) {
-      console.error(error);
+    } catch {
       setToast("Error occurred");
     } finally {
       setLoading(false);
@@ -67,15 +62,11 @@ function Customers() {
   const handleDeleteCustomer = async (id) => {
     if (!confirm("Are you sure?")) return;
 
-    try {
-      await deleteCustomer(id);
-      fetchCustomers();
-      setToast("Customer deleted");
-      setTimeout(() => setToast(""), 2000);
-    } catch (error) {
-      console.error(error);
-      setToast("Delete failed");
-    }
+    await deleteCustomer(id);
+    fetchCustomers();
+
+    setToast("Customer deleted");
+    setTimeout(() => setToast(""), 2000);
   };
 
   const handleEditCustomer = (c) => {
@@ -96,19 +87,30 @@ function Customers() {
 
   return (
     <div className="p-6">
+
       {/* 🔍 Search */}
       <input
         type="text"
         placeholder="Search by name or phone..."
-        className="border p-3 rounded-xl mb-6 w-full shadow-sm focus:ring-2 focus:ring-green-400 outline-none"
+        className="border p-3 rounded-xl mb-6 w-full shadow-sm 
+        bg-white dark:bg-gray-800 
+        text-gray-800 dark:text-white 
+        border-gray-200 dark:border-gray-700
+        focus:ring-2 focus:ring-green-400 outline-none"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
       {/* 📦 Card */}
-      <div className="bg-white p-6 rounded-2xl shadow-md border">
+      <div className="bg-white dark:bg-gray-800 
+        p-6 rounded-2xl shadow-sm 
+        border border-gray-200 dark:border-gray-700">
+
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Customers</h1>
+          <h1 className="text-2xl font-bold 
+            text-gray-800 dark:text-white">
+            Customers
+          </h1>
 
           <button
             onClick={() => {
@@ -116,7 +118,7 @@ function Customers() {
               setEditingId(null);
               setForm({ name: "", phone: "", address: "" });
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl shadow"
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
           >
             + Add Customer
           </button>
@@ -124,13 +126,13 @@ function Customers() {
 
         {/* Table */}
         {filteredCustomers.length === 0 ? (
-          <p className="text-center text-gray-500 py-10">
+          <p className="text-center text-gray-500 dark:text-gray-400 py-10">
             No customers found 😕
           </p>
         ) : (
-          <table className="w-full table-fixed border-separate border-spacing-y-3">
+          <table className="w-full border-separate border-spacing-y-3">
             <thead>
-              <tr className="text-gray-500 text-sm uppercase">
+              <tr className="text-gray-500 dark:text-gray-300 text-sm uppercase">
                 <th className="p-3 text-left">Customer</th>
                 <th className="p-3 text-left">Phone</th>
                 <th className="p-3 text-left">Address</th>
@@ -142,10 +144,10 @@ function Customers() {
               {filteredCustomers.map((c) => (
                 <tr
                   key={c.id}
-                  className="bg-white shadow-sm hover:shadow-md hover:scale-[1.01] transition rounded-lg"
+                  className="bg-white dark:bg-gray-700 
+                  shadow-sm hover:shadow-md transition rounded-lg"
                 >
-                  {/* ✅ FIXED ALIGNMENT */}
-                  <td className="p-3 rounded-l-lg">
+                  <td className="p-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white font-bold">
                         {c.name.charAt(0).toUpperCase()}
@@ -155,19 +157,22 @@ function Customers() {
                   </td>
 
                   <td className="p-3">{c.phone}</td>
-                  <td className="p-3 text-gray-600">{c.address}</td>
 
-                  <td className="p-3 rounded-r-lg flex gap-2">
+                  <td className="p-3 text-gray-600 dark:text-gray-300">
+                    {c.address}
+                  </td>
+
+                  <td className="p-3 flex gap-2">
                     <button
                       onClick={() => handleEditCustomer(c)}
-                      className="bg-blue-500/90 hover:bg-blue-600 text-white px-3 py-1 rounded-lg shadow"
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg"
                     >
                       Edit
                     </button>
 
                     <button
                       onClick={() => handleDeleteCustomer(c.id)}
-                      className="bg-red-500/90 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow"
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
                     >
                       Delete
                     </button>
@@ -182,14 +187,18 @@ function Customers() {
       {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-2xl shadow-lg w-[400px]">
-            <h2 className="text-xl font-semibold mb-4">
+          <div className="bg-white dark:bg-gray-800 
+            p-6 rounded-2xl shadow-lg w-[400px]">
+
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">
               {editingId ? "Edit Customer" : "Add Customer"}
             </h2>
 
             <div className="flex flex-col gap-3 mb-4">
               <input
-                className="border p-2 rounded focus:ring-2 focus:ring-green-400"
+                className="border p-2 rounded 
+                bg-white dark:bg-gray-700 
+                text-gray-800 dark:text-white"
                 placeholder="Name"
                 value={form.name}
                 onChange={(e) =>
@@ -198,7 +207,9 @@ function Customers() {
               />
 
               <input
-                className="border p-2 rounded focus:ring-2 focus:ring-green-400"
+                className="border p-2 rounded 
+                bg-white dark:bg-gray-700 
+                text-gray-800 dark:text-white"
                 placeholder="Phone"
                 value={form.phone}
                 onChange={(e) =>
@@ -207,7 +218,9 @@ function Customers() {
               />
 
               <input
-                className="border p-2 rounded focus:ring-2 focus:ring-green-400"
+                className="border p-2 rounded 
+                bg-white dark:bg-gray-700 
+                text-gray-800 dark:text-white"
                 placeholder="Address"
                 value={form.address}
                 onChange={(e) =>
@@ -219,7 +232,7 @@ function Customers() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowForm(false)}
-                className="bg-gray-300 px-4 py-2 rounded"
+                className="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded"
               >
                 Cancel
               </button>
