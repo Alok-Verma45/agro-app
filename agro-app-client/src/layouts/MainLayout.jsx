@@ -34,7 +34,6 @@ function MainLayout() {
         {sidebarOpen && (
           <div className="w-60 bg-gray-900 text-white p-4">
             <nav className="flex flex-col gap-2">
-              <NavLink to="/" className={linkClass}>Home</NavLink>
               <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
               <NavLink to="/customers" className={linkClass}>Customers</NavLink>
               <NavLink to="/products" className={linkClass}>Products</NavLink>

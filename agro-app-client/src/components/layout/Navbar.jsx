@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar({ toggleSidebar }) {
   const [dark, setDark] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
@@ -29,6 +35,15 @@ function Navbar({ toggleSidebar }) {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+  };
+
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
+
   return (
     <div className="sticky top-0 z-50 
       bg-gray-900 text-white 
@@ -37,8 +52,6 @@ function Navbar({ toggleSidebar }) {
 
       {/* LEFT */}
       <div className="flex items-center gap-4">
-        {/* Sidebar Toggle */}
-        
         <h1 className="text-xl font-bold text-green-400">
           Agro App 🌱
         </h1>
@@ -55,20 +68,41 @@ function Navbar({ toggleSidebar }) {
           {dark ? "☀️" : "🌙"}
         </button>
 
-        <button className="text-gray-300 hover:text-white">
-          Login
-        </button>
+        {/* ✅ AUTH LOGIC */}
+        {!isAuthPage && !token && (
+          <>
+            <Link to="/login" className="text-gray-300 hover:text-white">
+              Login
+            </Link>
 
-        <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
-          Signup
-        </button>
+            <Link
+              to="/signup"
+              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+            >
+              Signup
+            </Link>
+          </>
+        )}
 
-        <button
-          onClick={toggleSidebar}
-          className="px-3 py-1 bg-gray-700 rounded"
-        >
-          ☰
-        </button>
+        {/* ✅ LOGOUT */}
+        {token && (
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
+          >
+            Logout
+          </button>
+        )}
+
+        {/* Sidebar Toggle → ONLY ADMIN */}
+{toggleSidebar && role === "ADMIN" && (
+  <button
+    onClick={toggleSidebar}
+    className="px-3 py-1 bg-gray-700 rounded"
+  >
+    ☰
+  </button>
+)}
       </div>
     </div>
   );

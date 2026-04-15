@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 import Home from "../pages/Home";
@@ -6,22 +6,67 @@ import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
 import Credits from "../pages/Credits";
+import Login from "../pages/Login";
+import Signup from "../pages/Signup";
+
+// 🔥 ADMIN PROTECTED
+const AdminRoute = ({ children }) => {
+  const role = localStorage.getItem("role");
+
+  if (!role || role !== "ADMIN") {
+    return <Navigate to="/home" />;
+  }
+
+  return children;
+};
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* ✅ ADD path="/" */}
-      <Route path="/" element={<MainLayout />}>
+      <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* ✅ DEFAULT PAGE */}
-        <Route index element={<Home />} />
+      {/* AUTH */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-        {/* ✅ OTHER ROUTES */}
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="products" element={<Products />} />
-        <Route path="credits" element={<Credits />} />
+      {/* APP */}
+      <Route element={<MainLayout />}>
+        {/* USER */}
+        <Route path="/home" element={<Home />} />
 
+        {/* ADMIN */}
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <Dashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/credits"
+          element={
+            <AdminRoute>
+              <Credits />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <AdminRoute>
+              <Products />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <AdminRoute>
+              <Customers />
+            </AdminRoute>
+          }
+        />
       </Route>
     </Routes>
   );
