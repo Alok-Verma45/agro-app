@@ -6,6 +6,7 @@ import com.alok.agroapp.entity.enums.Role;
 import com.alok.agroapp.repository.UserRepository;
 import com.alok.agroapp.security.JwtUtil;
 import com.alok.agroapp.service.AuthService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,10 +14,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository, JwtUtil jwtUtil) {
+    public AuthServiceImpl(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -25,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .password(request.getPassword()) // 🔥 plain for now
+                .password(passwordEncoder.encode(request.getPassword())) // 🔥 plain for now
                 .role(Role.USER)
                 .build();
 
@@ -40,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
