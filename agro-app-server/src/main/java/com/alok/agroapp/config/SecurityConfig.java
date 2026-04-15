@@ -31,13 +31,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
+                        // 🔓 Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // 👤 USER → only home
+                        .requestMatchers("/api/home/**").hasAnyRole("USER", "ADMIN")
+
+                        // 👑 ADMIN only
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
-
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/credits/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/api/credits/**").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )

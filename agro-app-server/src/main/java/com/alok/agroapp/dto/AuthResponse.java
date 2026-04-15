@@ -1,14 +1,24 @@
 package com.alok.agroapp.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class AuthResponse {
+
+    // getters
     private String token;
+    private String role;
+    private String message;
+
+    // 🔥 LOGIN constructor
+    public AuthResponse(String token, String role) {
+        this.token = token;
+        this.role = role;
+    }
+
+    // 🔥 REGISTER constructor
+    public AuthResponse(String message) {
+        this.message = message;
+    }
+
 }
