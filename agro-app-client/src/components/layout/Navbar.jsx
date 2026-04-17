@@ -41,68 +41,82 @@ function Navbar({ toggleSidebar }) {
     navigate("/login");
   };
 
+  const handleLogoClick = () => {
+    if (token) {
+      navigate("/home"); // 🔥 ya dashboard bhi kar sakte ho based on role
+    } else {
+      navigate("/login");
+    }
+  };
+
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <div className="sticky top-0 z-50 
+    <div
+      className="sticky top-0 z-50 
       bg-gray-900 text-white 
       border-b border-gray-700 
-      shadow-sm px-6 py-3 flex justify-between items-center">
-
-      {/* LEFT */}
-      <div className="flex items-center gap-4">
-        <h1 className="text-xl font-bold text-green-400">
-          Agro App 🌱
-        </h1>
+      shadow-sm px-6 py-3 flex justify-between items-center"
+    >
+      {/* LEFT (LOGO CLICKABLE) */}
+      <div
+        onClick={handleLogoClick}
+        className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition"
+      >
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-200 tracking-wide">
+  उन्नतशील बीज भंडार <span className="text-green-400">🌱</span>
+</h1>
       </div>
 
       {/* RIGHT */}
       <div className="flex items-center gap-4">
-
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 bg-gray-700 rounded"
+          className="px-3 py-1 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
         >
           {dark ? "☀️" : "🌙"}
         </button>
 
-        {/* ✅ AUTH LOGIC */}
+        {/* AUTH BUTTONS */}
         {!isAuthPage && !token && (
           <>
-            <Link to="/login" className="text-gray-300 hover:text-white">
+            <Link
+              to="/login"
+              className="text-gray-300 hover:text-white cursor-pointer transition"
+            >
               Login
             </Link>
 
             <Link
               to="/signup"
-              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded cursor-pointer transition"
             >
               Signup
             </Link>
           </>
         )}
 
-        {/* ✅ LOGOUT */}
+        {/* LOGOUT */}
         {token && (
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
+            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer transition"
           >
             Logout
           </button>
         )}
 
-        {/* Sidebar Toggle → ONLY ADMIN */}
-{toggleSidebar && role === "ADMIN" && (
-  <button
-    onClick={toggleSidebar}
-    className="px-3 py-1 bg-gray-700 rounded"
-  >
-    ☰
-  </button>
-)}
+        {/* SIDEBAR TOGGLE (ADMIN ONLY) */}
+        {toggleSidebar && role === "ADMIN" && (
+          <button
+            onClick={toggleSidebar}
+            className="px-3 py-1 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
+          >
+            ☰
+          </button>
+        )}
       </div>
     </div>
   );
