@@ -31,7 +31,7 @@ function Customers() {
 
   const handleAddCustomer = async () => {
     if (!form.name || !form.phone) {
-      alert("Name and Phone required");
+      setToast("⚠️ नाम और फोन जरूरी है");
       return;
     }
 
@@ -40,32 +40,31 @@ function Customers() {
     try {
       if (editingId) {
         await updateCustomer(editingId, form);
-        setToast("Customer updated");
+        setToast("✅ ग्राहक अपडेट हुआ");
       } else {
         await addCustomer(form);
-        setToast("Customer added");
+        setToast("✅ ग्राहक जोड़ा गया");
       }
 
       setForm({ name: "", phone: "", address: "" });
       setEditingId(null);
       setShowForm(false);
       fetchCustomers();
-
-      setTimeout(() => setToast(""), 2000);
     } catch {
-      setToast("Error occurred");
+      setToast("❌ कुछ गलत हुआ");
     } finally {
       setLoading(false);
+      setTimeout(() => setToast(""), 2000);
     }
   };
 
   const handleDeleteCustomer = async (id) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("ग्राहक हटाना चाहते हो?")) return;
 
     await deleteCustomer(id);
     fetchCustomers();
 
-    setToast("Customer deleted");
+    setToast("🗑️ ग्राहक हटाया गया");
     setTimeout(() => setToast(""), 2000);
   };
 
@@ -86,30 +85,29 @@ function Customers() {
   );
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
 
-      {/* 🔍 Search */}
+      {/* 🔍 SEARCH */}
       <input
         type="text"
-        placeholder="Search by name or phone..."
-        className="border p-3 rounded-xl mb-6 w-full shadow-sm 
-        bg-white dark:bg-gray-800 
-        text-gray-800 dark:text-white 
-        border-gray-200 dark:border-gray-700
-        focus:ring-2 focus:ring-green-400 outline-none"
+        placeholder="🔍 ग्राहक खोजें..."
+        className="w-full p-4 rounded-2xl 
+        bg-white/70 dark:bg-white/10 backdrop-blur-lg
+        border border-white/20
+        text-gray-800 dark:text-white
+        focus:ring-2 focus:ring-green-400 outline-none shadow-lg"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* 📦 Card */}
-      <div className="bg-white dark:bg-gray-800 
-        p-6 rounded-2xl shadow-sm 
-        border border-gray-200 dark:border-gray-700">
+      {/* 📦 MAIN CARD */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-xl 
+      p-6 rounded-3xl shadow-xl border border-white/20">
 
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold 
-            text-gray-800 dark:text-white">
-            Customers
+          <h1 className="text-2xl font-bold dark:text-white">
+            👥 ग्राहक सूची
           </h1>
 
           <button
@@ -118,88 +116,87 @@ function Customers() {
               setEditingId(null);
               setForm({ name: "", phone: "", address: "" });
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
+            className="bg-gradient-to-r from-green-500 to-green-600 
+            hover:scale-105 active:scale-95
+            text-white px-5 py-2 rounded-xl shadow-md transition"
           >
-            + Add Customer
+            + नया ग्राहक
           </button>
         </div>
 
-        {/* Table */}
+        {/* LIST */}
         {filteredCustomers.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-10">
-            No customers found 😕
+          <p className="text-center text-gray-500 py-10">
+            कोई ग्राहक नहीं मिला 😕
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-gray-500 dark:text-gray-300 text-sm uppercase">
-                <th className="p-3 text-left">Customer</th>
-                <th className="p-3 text-left">Phone</th>
-                <th className="p-3 text-left">Address</th>
-                <th className="p-3 text-left">Action</th>
-              </tr>
-            </thead>
+          <div className="space-y-4">
+            {filteredCustomers.map((c) => (
+              <div
+                key={c.id}
+                className="flex justify-between items-center p-4 rounded-xl
+                bg-white/60 dark:bg-gray-800
+                hover:shadow-lg hover:scale-[1.01] transition"
+              >
+                {/* LEFT */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 flex items-center justify-center 
+                  rounded-full bg-gradient-to-r from-green-500 to-emerald-500 
+                  text-white font-bold text-lg">
+                    {c.name.charAt(0).toUpperCase()}
+                  </div>
 
-            <tbody>
-              {filteredCustomers.map((c) => (
-                <tr
-                  key={c.id}
-                  className="bg-white dark:bg-gray-700 
-                  shadow-sm hover:shadow-md transition rounded-lg"
-                >
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white font-bold">
-                        {c.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-medium">{c.name}</span>
-                    </div>
-                  </td>
+                  <div>
+                    <p className="font-semibold text-lg">{c.name}</p>
+                    <p className="text-sm text-gray-500">
+                      📞 {c.phone}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      📍 {c.address}
+                    </p>
+                  </div>
+                </div>
 
-                  <td className="p-3">{c.phone}</td>
+                {/* RIGHT */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditCustomer(c)}
+                    className="px-3 py-1 rounded-lg 
+                    bg-blue-500 hover:bg-blue-600 text-white"
+                  >
+                    Edit
+                  </button>
 
-                  <td className="p-3 text-gray-600 dark:text-gray-300">
-                    {c.address}
-                  </td>
-
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => handleEditCustomer(c)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteCustomer(c.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <button
+                    onClick={() => handleDeleteCustomer(c.id)}
+                    className="px-3 py-1 rounded-lg 
+                    bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Modal */}
+      {/* 🔥 MODAL */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 flex items-center justify-center 
+        bg-black/50 backdrop-blur-sm">
+
           <div className="bg-white dark:bg-gray-800 
-            p-6 rounded-2xl shadow-lg w-[400px]">
+          p-6 rounded-2xl shadow-xl w-[400px]">
 
             <h2 className="text-xl font-semibold mb-4 dark:text-white">
-              {editingId ? "Edit Customer" : "Add Customer"}
+              {editingId ? "✏️ ग्राहक अपडेट करें" : "➕ नया ग्राहक"}
             </h2>
 
             <div className="flex flex-col gap-3 mb-4">
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Name"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="नाम"
                 value={form.name}
                 onChange={(e) =>
                   setForm({ ...form, name: e.target.value })
@@ -207,10 +204,8 @@ function Customers() {
               />
 
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Phone"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="फोन"
                 value={form.phone}
                 onChange={(e) =>
                   setForm({ ...form, phone: e.target.value })
@@ -218,10 +213,8 @@ function Customers() {
               />
 
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Address"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="पता"
                 value={form.address}
                 onChange={(e) =>
                   setForm({ ...form, address: e.target.value })
@@ -232,7 +225,7 @@ function Customers() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowForm(false)}
-                className="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded"
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600"
               >
                 Cancel
               </button>
@@ -240,18 +233,19 @@ function Customers() {
               <button
                 onClick={handleAddCustomer}
                 disabled={loading}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
               >
-                {loading ? "Saving..." : editingId ? "Update" : "Add"}
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast */}
+      {/* 🔔 TOAST */}
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-black text-white px-4 py-2 rounded shadow">
+        <div className="fixed bottom-5 right-5 
+        bg-black text-white px-4 py-2 rounded-lg shadow-lg">
           {toast}
         </div>
       )}

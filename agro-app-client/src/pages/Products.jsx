@@ -31,7 +31,7 @@ function Products() {
 
   const handleAddProduct = async () => {
     if (!form.name || !form.price) {
-      alert("Name and Price required");
+      setToast("⚠️ Name & Price required");
       return;
     }
 
@@ -40,32 +40,31 @@ function Products() {
     try {
       if (editingId) {
         await updateProduct(editingId, form);
-        setToast("Product updated");
+        setToast("✅ Product updated");
       } else {
         await addProduct(form);
-        setToast("Product added");
+        setToast("✅ Product added");
       }
 
       setForm({ name: "", price: "", quantity: "" });
       setEditingId(null);
       setShowForm(false);
       fetchProducts();
-
-      setTimeout(() => setToast(""), 2000);
     } catch {
-      setToast("Error occurred");
+      setToast("❌ Error occurred");
     } finally {
       setLoading(false);
+      setTimeout(() => setToast(""), 2000);
     }
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Delete this product?")) return;
 
     await deleteProduct(id);
     fetchProducts();
 
-    setToast("Product deleted");
+    setToast("🗑️ Product deleted");
     setTimeout(() => setToast(""), 2000);
   };
 
@@ -86,30 +85,32 @@ function Products() {
   );
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
 
-      {/* 🔍 Search */}
-      <input
-        type="text"
-        placeholder="Search by name or price..."
-        className="border p-3 rounded-xl mb-6 w-full shadow-sm
-        bg-white dark:bg-gray-800
-        text-gray-800 dark:text-white
-        border-gray-200 dark:border-gray-700
-        focus:ring-2 focus:ring-green-400 outline-none"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      {/* 🔍 PREMIUM SEARCH */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="🔍 उत्पाद खोजें..."
+          className="w-full p-4 rounded-2xl 
+          bg-white/70 dark:bg-white/10 backdrop-blur-lg
+          border border-white/20
+          text-gray-800 dark:text-white
+          focus:ring-2 focus:ring-green-400 outline-none
+          shadow-lg"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-      {/* 📦 Card */}
-      <div className="bg-white dark:bg-gray-800 
-        p-6 rounded-2xl shadow-sm 
-        border border-gray-200 dark:border-gray-700">
+      {/* 📦 MAIN CARD */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-xl 
+        p-6 rounded-3xl shadow-xl border border-white/20">
 
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold 
-            text-gray-800 dark:text-white">
-            Products
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            📦 उत्पाद सूची
           </h1>
 
           <button
@@ -118,94 +119,92 @@ function Products() {
               setEditingId(null);
               setForm({ name: "", price: "", quantity: "" });
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
+            className="bg-gradient-to-r from-green-500 to-green-600 
+            hover:scale-105 active:scale-95
+            text-white px-5 py-2 rounded-xl shadow-md transition"
           >
-            + Add Product
+            + नया उत्पाद
           </button>
         </div>
 
-        {/* Table */}
+        {/* LIST */}
         {filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-10">
-            No products found 😕
+          <p className="text-center text-gray-500 py-10">
+            कोई उत्पाद नहीं मिला 😕
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-gray-500 dark:text-gray-300 text-sm uppercase">
-                <th className="p-3 text-left">Product</th>
-                <th className="p-3 text-left">Price</th>
-                <th className="p-3 text-left">Quantity</th>
-                <th className="p-3 text-left">Action</th>
-              </tr>
-            </thead>
+          <div className="space-y-4">
+            {filteredProducts.map((p) => (
+              <div
+                key={p.id}
+                className="flex justify-between items-center p-4 rounded-xl
+                bg-white/60 dark:bg-gray-800
+                hover:shadow-lg hover:scale-[1.01]
+                transition"
+              >
+                {/* LEFT */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 flex items-center justify-center 
+                  rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
+                  text-white font-bold text-lg">
+                    {p.name.charAt(0).toUpperCase()}
+                  </div>
 
-            <tbody>
-              {filteredProducts.map((p) => (
-                <tr
-                  key={p.id}
-                  className="bg-white dark:bg-gray-700 
-                  shadow-sm hover:shadow-md transition rounded-lg"
-                >
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold">
-                        {p.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-medium">{p.name}</span>
-                    </div>
-                  </td>
+                  <div>
+                    <p className="font-semibold text-lg">{p.name}</p>
+                    <p className="text-sm text-gray-500">
+                      मात्रा: {p.quantity}
+                    </p>
+                  </div>
+                </div>
 
-                  <td className="p-3 font-medium text-blue-600">
+                {/* RIGHT */}
+                <div className="flex items-center gap-6">
+
+                  <span className="text-blue-500 font-bold text-lg">
                     ₹{p.price}
-                  </td>
+                  </span>
 
-                  <td className="p-3">
-                    <span className="px-2 py-1 rounded text-sm 
-                      bg-gray-100 dark:bg-gray-600 
-                      text-gray-800 dark:text-white">
-                      {p.quantity}
-                    </span>
-                  </td>
-
-                  <td className="p-3 flex gap-2">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleEditProduct(p)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg"
+                      className="px-3 py-1 rounded-lg 
+                      bg-blue-500 hover:bg-blue-600 text-white transition"
                     >
                       Edit
                     </button>
 
                     <button
                       onClick={() => handleDeleteProduct(p.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
+                      className="px-3 py-1 rounded-lg 
+                      bg-red-500 hover:bg-red-600 text-white transition"
                     >
                       Delete
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Modal */}
+      {/* 🔥 MODAL */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 flex items-center justify-center 
+        bg-black/50 backdrop-blur-sm">
+
           <div className="bg-white dark:bg-gray-800 
-            p-6 rounded-2xl shadow-lg w-[400px]">
+            p-6 rounded-2xl shadow-xl w-[400px] animate-scaleIn">
 
             <h2 className="text-xl font-semibold mb-4 dark:text-white">
-              {editingId ? "Edit Product" : "Add Product"}
+              {editingId ? "✏️ उत्पाद संपादित करें" : "➕ नया उत्पाद"}
             </h2>
 
             <div className="flex flex-col gap-3 mb-4">
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Name"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="नाम"
                 value={form.name}
                 onChange={(e) =>
                   setForm({ ...form, name: e.target.value })
@@ -213,10 +212,8 @@ function Products() {
               />
 
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Price"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="कीमत"
                 value={form.price}
                 onChange={(e) =>
                   setForm({ ...form, price: e.target.value })
@@ -224,10 +221,8 @@ function Products() {
               />
 
               <input
-                className="border p-2 rounded 
-                bg-white dark:bg-gray-700 
-                text-gray-800 dark:text-white"
-                placeholder="Quantity"
+                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                placeholder="मात्रा"
                 value={form.quantity}
                 onChange={(e) =>
                   setForm({ ...form, quantity: e.target.value })
@@ -238,7 +233,7 @@ function Products() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowForm(false)}
-                className="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded"
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600"
               >
                 Cancel
               </button>
@@ -246,18 +241,19 @@ function Products() {
               <button
                 onClick={handleAddProduct}
                 disabled={loading}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
               >
-                {loading ? "Saving..." : editingId ? "Update" : "Add"}
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast */}
+      {/* 🔔 TOAST */}
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-black text-white px-4 py-2 rounded shadow">
+        <div className="fixed bottom-5 right-5 
+        bg-black text-white px-4 py-2 rounded-lg shadow-lg">
           {toast}
         </div>
       )}

@@ -43,7 +43,7 @@ function Navbar({ toggleSidebar }) {
 
   const handleLogoClick = () => {
     if (token) {
-      navigate("/home"); // 🔥 ya dashboard bhi kar sakte ho based on role
+      navigate("/home");
     } else {
       navigate("/login");
     }
@@ -53,45 +53,51 @@ function Navbar({ toggleSidebar }) {
     location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <div
-      className="sticky top-0 z-50 
-      bg-gray-900 text-white 
-      border-b border-gray-700 
-      shadow-sm px-6 py-3 flex justify-between items-center"
-    >
-      {/* LEFT (LOGO CLICKABLE) */}
+    <div className="sticky top-0 z-50 
+      bg-gray-900/80 backdrop-blur-md text-white 
+      border-b border-gray-700/50 
+      shadow-md px-6 py-3 flex justify-between items-center">
+
+      {/* 🔥 LOGO */}
       <div
         onClick={handleLogoClick}
-        className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition"
+        className="flex items-center gap-3 cursor-pointer group"
       >
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-200 tracking-wide">
-  उन्नतशील बीज भंडार <span className="text-green-400">🌱</span>
-</h1>
+        <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-200 group-hover:text-green-400 transition">
+          उन्नतशील बीज भंडार
+        </h1>
+        <span className="text-green-400 text-xl group-hover:scale-110 transition">
+          🌱
+        </span>
       </div>
 
       {/* RIGHT */}
       <div className="flex items-center gap-4">
-        {/* Theme Toggle */}
+
+        {/* 🌙 THEME */}
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
+          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
+          rounded-lg transition cursor-pointer"
         >
           {dark ? "☀️" : "🌙"}
         </button>
 
-        {/* AUTH BUTTONS */}
+        {/* AUTH */}
         {!isAuthPage && !token && (
           <>
             <Link
               to="/login"
-              className="text-gray-300 hover:text-white cursor-pointer transition"
+              className="text-gray-300 hover:text-white transition"
             >
               Login
             </Link>
 
             <Link
               to="/signup"
-              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded cursor-pointer transition"
+              className="bg-green-500 hover:bg-green-600 
+              text-white px-4 py-1.5 rounded-lg 
+              transition shadow-md"
             >
               Signup
             </Link>
@@ -102,17 +108,20 @@ function Navbar({ toggleSidebar }) {
         {token && (
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer transition"
+            className="bg-red-500 hover:bg-red-600 
+            px-4 py-1.5 rounded-lg 
+            transition shadow-md"
           >
             Logout
           </button>
         )}
 
-        {/* SIDEBAR TOGGLE (ADMIN ONLY) */}
+        {/* ☰ ADMIN */}
         {toggleSidebar && role === "ADMIN" && (
           <button
             onClick={toggleSidebar}
-            className="px-3 py-1 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
+            className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
+            rounded-lg transition cursor-pointer"
           >
             ☰
           </button>

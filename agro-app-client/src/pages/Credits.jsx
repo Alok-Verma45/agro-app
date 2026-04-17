@@ -8,6 +8,8 @@ function Credits() {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [toast, setToast] = useState("");
+  const [showPayModal, setShowPayModal] = useState(null);
+  const [payAmount, setPayAmount] = useState("");
 
   const [form, setForm] = useState({
     customerId: "",
@@ -17,61 +19,48 @@ function Credits() {
   });
 
   useEffect(() => {
-    fetchCredits();
-    fetchCustomers();
-    fetchProducts();
+    fetchAll();
   }, []);
 
-  const fetchCredits = async () => {
-    const res = await getCredits();
-    setCredits(res.data);
-  };
+  const fetchAll = async () => {
+    const [creditRes, custRes, prodRes] = await Promise.all([
+      getCredits(),
+      getCustomers(),
+      getProducts(),
+    ]);
 
-  const fetchCustomers = async () => {
-    const res = await getCustomers();
-    setCustomers(res.data);
-  };
-
-  const fetchProducts = async () => {
-    const res = await getProducts();
-    setProducts(res.data);
+    setCredits(creditRes.data);
+    setCustomers(custRes.data);
+    setProducts(prodRes.data);
   };
 
   const handleAddCredit = async () => {
     if (!form.customerId || !form.productId || !form.quantity) {
-      alert("Customer, Product & Quantity required");
+      setToast("⚠️ सभी फील्ड भरें");
       return;
     }
 
-    try {
-      await addCredit(form.customerId, {
-        product: { id: Number(form.productId) },
-        quantity: Number(form.quantity),
-        paidAmount: Number(form.paidAmount || 0),
-      });
+    await addCredit(form.customerId, {
+      product: { id: Number(form.productId) },
+      quantity: Number(form.quantity),
+      paidAmount: Number(form.paidAmount || 0),
+    });
 
-      setForm({
-        customerId: "",
-        productId: "",
-        quantity: "",
-        paidAmount: "",
-      });
-
-      setToast("Credit added");
-      fetchCredits();
-      setTimeout(() => setToast(""), 2000);
-    } catch (err) {
-      setToast("Error occurred");
-    }
+    setForm({ customerId: "", productId: "", quantity: "", paidAmount: "" });
+    setToast("✅ उधार जोड़ा गया");
+    fetchAll();
+    setTimeout(() => setToast(""), 2000);
   };
 
-  const handlePay = async (credit) => {
-    const amount = prompt("Enter payment amount");
-    if (!amount || isNaN(amount)) return;
+  const handlePay = async () => {
+    if (!payAmount) return;
 
-    await addPayment(credit.id, Number(amount));
-    setToast("Payment added 💰");
-    fetchCredits();
+    await addPayment(showPayModal.id, Number(payAmount));
+
+    setShowPayModal(null);
+    setPayAmount("");
+    setToast("💰 भुगतान सफल");
+    fetchAll();
     setTimeout(() => setToast(""), 2000);
   };
 
@@ -80,51 +69,44 @@ function Credits() {
   );
 
   return (
-    <div className="p-6">
-      {/* Heading */}
-      <h1 className="text-2xl font-bold mb-6 
-        text-gray-800 dark:text-white">
-        Credits <span className="text-gray-500">(Udhar/Paid)</span>
+    <div className="p-6 space-y-6">
+
+      {/* 🔥 HEADING */}
+      <h1 className="text-3xl font-bold text-green-400">
+        💳 उधार प्रबंधन
       </h1>
 
-      {/* FORM */}
-      <div className="bg-white dark:bg-gray-800 
-        p-6 rounded-2xl shadow-sm 
-        border border-gray-200 dark:border-gray-700 mb-6">
-        
+      {/* 🔥 ADD CREDIT */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-xl 
+      p-6 rounded-3xl shadow-xl border border-white/20">
+
         <h2 className="text-lg font-semibold mb-4 dark:text-white">
-          Add Credit
+          ➕ नया उधार जोड़ें
         </h2>
 
-        <div className="flex gap-4 mb-4">
-          
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
           <select
-            className="border p-3 rounded-xl w-full 
-              bg-white dark:bg-gray-700 
-              text-gray-800 dark:text-white"
+            className="p-3 rounded-xl bg-white/60 dark:bg-gray-800"
             value={form.customerId}
             onChange={(e) =>
               setForm({ ...form, customerId: e.target.value })
             }
           >
-            <option value="">Customer</option>
+            <option value="">ग्राहक</option>
             {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
 
           <select
-            className="border p-3 rounded-xl w-full 
-              bg-white dark:bg-gray-700 
-              text-gray-800 dark:text-white"
+            className="p-3 rounded-xl bg-white/60 dark:bg-gray-800"
             value={form.productId}
             onChange={(e) =>
               setForm({ ...form, productId: e.target.value })
             }
           >
-            <option value="">Product</option>
+            <option value="">उत्पाद</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name} (₹{p.price})
@@ -134,10 +116,8 @@ function Credits() {
 
           <input
             type="number"
-            placeholder="Qty"
-            className="border p-3 rounded-xl w-full 
-              bg-white dark:bg-gray-700 
-              text-gray-800 dark:text-white"
+            placeholder="मात्रा"
+            className="p-3 rounded-xl bg-white/60 dark:bg-gray-800"
             value={form.quantity}
             onChange={(e) =>
               setForm({ ...form, quantity: e.target.value })
@@ -147,9 +127,7 @@ function Credits() {
           <input
             type="number"
             placeholder="Paid"
-            className="border p-3 rounded-xl w-full 
-              bg-white dark:bg-gray-700 
-              text-gray-800 dark:text-white"
+            className="p-3 rounded-xl bg-white/60 dark:bg-gray-800"
             value={form.paidAmount}
             onChange={(e) =>
               setForm({ ...form, paidAmount: e.target.value })
@@ -159,83 +137,119 @@ function Credits() {
 
         <button
           onClick={handleAddCredit}
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
+          className="mt-4 bg-gradient-to-r from-green-500 to-green-600 
+          px-6 py-2 rounded-xl text-white hover:scale-105 transition"
         >
           Add Credit
         </button>
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white dark:bg-gray-800 
-        p-6 rounded-2xl shadow-sm 
-        border border-gray-200 dark:border-gray-700">
+      {/* 🔥 CREDIT LIST */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-xl 
+      p-6 rounded-3xl shadow-xl border border-white/20">
 
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">
-          All Credits
+        <h2 className="text-xl font-semibold mb-4">
+          📋 सभी उधार
         </h2>
 
-        <table className="w-full border-separate border-spacing-y-3">
-          <thead>
-            <tr className="text-gray-500 dark:text-gray-300 text-sm uppercase">
-              <th className="p-3 text-left">Customer</th>
-              <th className="p-3 text-left">Product</th>
-              <th className="p-3 text-left">Qty</th>
-              <th className="p-3 text-left">Total</th>
-              <th className="p-3 text-left">Paid</th>
-              <th className="p-3 text-left">Pending</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
+        <div className="space-y-4">
+          {sortedCredits.map((c, i) => (
+            <div
+              key={c.id}
+              className={`p-4 rounded-xl flex justify-between items-center
+              ${c.pendingAmount > 0
+                ? "bg-red-100/50 dark:bg-red-900/20"
+                : "bg-white/60 dark:bg-gray-800"}
+              hover:scale-[1.01] transition`}
+            >
+              {/* LEFT */}
+              <div>
+                <p className="font-semibold text-lg">
+                  {c.customer?.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {c.product?.name} • Qty: {c.quantity}
+                </p>
+              </div>
 
-          <tbody>
-            {sortedCredits.map((c, index) => (
-              <tr
-                key={c.id}
-                className={`bg-white dark:bg-gray-700 
-                  shadow-sm hover:shadow-md transition rounded-lg 
-                  ${index === 0 ? "bg-red-50 dark:bg-red-900/30 font-semibold" : ""}`}
-              >
-                <td className="p-3">{c.customer?.name}</td>
-                <td className="p-3">{c.product?.name}</td>
-                <td className="p-3">{c.quantity}</td>
+              {/* MIDDLE */}
+              <div className="flex gap-6 text-sm font-semibold">
+                <span className="text-blue-500">₹{c.totalAmount}</span>
+                <span className="text-green-500">₹{c.paidAmount}</span>
+                <span className="text-red-500">₹{c.pendingAmount}</span>
+              </div>
 
-                <td className="p-3 text-blue-600">₹{c.totalAmount}</td>
-                <td className="p-3 text-green-600">₹{c.paidAmount}</td>
-                <td className="p-3 text-red-500">₹{c.pendingAmount}</td>
+              {/* RIGHT */}
+              <div className="flex items-center gap-3">
 
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded text-sm font-semibold ${
-                      c.status === "PAID"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-red-100 text-red-600"
-                    }`}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    c.status === "PAID"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {c.status}
+                </span>
+
+                {c.status !== "PAID" && (
+                  <button
+                    onClick={() => setShowPayModal(c)}
+                    className="bg-yellow-500 hover:bg-yellow-600 
+                    text-white px-4 py-1 rounded-lg"
                   >
-                    {c.status}
-                  </span>
-                </td>
-
-                <td className="p-3">
-                  {c.status !== "PAID" && (
-                    <button
-                      onClick={() => handlePay(c)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg"
-                    >
-                      Pay
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    Pay
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* TOAST */}
+      {/* 💰 PAY MODAL */}
+      {showPayModal && (
+        <div className="fixed inset-0 flex items-center justify-center 
+        bg-black/50 backdrop-blur-sm">
+
+          <div className="bg-white dark:bg-gray-800 
+          p-6 rounded-2xl shadow-xl w-[350px]">
+
+            <h2 className="text-lg font-semibold mb-4">
+              भुगतान करें
+            </h2>
+
+            <input
+              type="number"
+              placeholder="Amount"
+              className="w-full p-3 rounded-lg mb-4 bg-gray-100 dark:bg-gray-700"
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowPayModal(null)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handlePay}
+                className="px-4 py-2 bg-green-500 text-white rounded"
+              >
+                Pay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔔 TOAST */}
       {toast && (
         <div className="fixed bottom-5 right-5 
-          bg-black text-white px-4 py-2 rounded shadow">
+        bg-black text-white px-4 py-2 rounded-lg shadow-lg">
           {toast}
         </div>
       )}

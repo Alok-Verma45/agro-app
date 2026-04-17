@@ -40,128 +40,121 @@ function Dashboard() {
   );
 
   return (
-    <div className="p-6">
-      
-      {/* Heading */}
-      <h1 className="text-3xl font-bold mb-6">
-        Dashboard
+    <div className="p-6 space-y-6">
+
+      {/* 🔥 HEADING */}
+      <h1 className="text-3xl font-bold text-green-400">
+        📊 डैशबोर्ड
       </h1>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* 🔥 CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-300">
-            Total Customers 👥
+        <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+        p-5 rounded-2xl shadow-lg border border-white/20 hover:scale-105 transition">
+          <p className="text-gray-500 dark:text-gray-300 text-sm">
+            कुल ग्राहक 👥
           </p>
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-3xl font-bold mt-2">
             {customers.length}
           </h2>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-300">
-            Total Sales 💰
+        <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+        p-5 rounded-2xl shadow-lg border border-white/20 hover:scale-105 transition">
+          <p className="text-gray-500 dark:text-gray-300 text-sm">
+            कुल बिक्री 💰
           </p>
-          <h2 className="text-2xl font-bold text-blue-600">
+          <h2 className="text-3xl font-bold text-blue-500 mt-2">
             ₹{dashboard.totalCredit || 0}
           </h2>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-300">
-            Amount Received 💵
+        <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+        p-5 rounded-2xl shadow-lg border border-white/20 hover:scale-105 transition">
+          <p className="text-gray-500 dark:text-gray-300 text-sm">
+            प्राप्त राशि 💵
           </p>
-          <h2 className="text-2xl font-bold text-green-600">
+          <h2 className="text-3xl font-bold text-green-500 mt-2">
             ₹{dashboard.totalPaid || 0}
           </h2>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-300">
-            Pending Amount ⚠️
+        <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+        p-5 rounded-2xl shadow-lg border border-white/20 hover:scale-105 transition">
+          <p className="text-gray-500 dark:text-gray-300 text-sm">
+            बकाया राशि ⚠️
           </p>
-          <h2 className="text-2xl font-bold text-red-500">
+          <h2 className="text-3xl font-bold text-red-500 mt-2">
             ₹{dashboard.totalPending || 0}
           </h2>
         </div>
       </div>
 
-      {/* Top Customers */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+      {/* 🔥 TOP CUSTOMERS */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+      p-6 rounded-2xl shadow-lg border border-white/20">
+
         <h2 className="text-xl font-semibold mb-4">
-          Top Customers
+          ⭐ शीर्ष ग्राहक
         </h2>
 
         {topCustomers.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">
-            No data available
+            कोई डेटा उपलब्ध नहीं
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-y-2">
-            <thead>
-              <tr className="text-left text-gray-600 dark:text-gray-300">
-                <th className="p-2">Customer</th>
-                <th className="p-2">Pending</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {topCustomers.map((c, i) => (
-                <tr
-                  key={i}
-                  className={`bg-white dark:bg-gray-700 shadow-sm rounded-lg ${
-                    i === 0 ? "bg-red-50 dark:bg-red-900/30 font-semibold" : ""
-                  }`}
-                >
-                  <td className="p-3">{c.customerName}</td>
-                  <td className="p-3 text-red-500 font-semibold">
-                    ₹{c.pendingAmount}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="space-y-3">
+            {topCustomers.map((c, i) => (
+              <div
+                key={i}
+                className={`flex justify-between items-center p-3 rounded-lg
+                ${
+                  i === 0
+                    ? "bg-red-100 dark:bg-red-900/30 font-semibold"
+                    : "bg-white/60 dark:bg-gray-800"
+                } hover:scale-[1.02] transition`}
+              >
+                <span>{c.customerName}</span>
+                <span className="text-red-500 font-semibold">
+                  ₹{c.pendingAmount}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Pending Overview */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+      {/* 🔥 PENDING LIST */}
+      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-lg 
+      p-6 rounded-2xl shadow-lg border border-white/20">
+
         <h2 className="text-xl font-semibold mb-4">
-          Customer Pending Overview
+          📉 बकाया विवरण
         </h2>
 
         {sortedPending.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">
-            No data available
+            कोई डेटा उपलब्ध नहीं
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-y-2">
-            <thead>
-              <tr className="text-left text-gray-600 dark:text-gray-300">
-                <th className="p-2">Customer</th>
-                <th className="p-2">Pending</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {sortedPending.map((c, i) => (
-                <tr
-                  key={i}
-                  className={`bg-white dark:bg-gray-700 shadow-sm rounded-lg ${
-                    i === 0 ? "bg-red-50 dark:bg-red-900/30 font-semibold" : ""
-                  }`}
-                >
-                  <td className="p-3">{c.customerName}</td>
-                  <td className="p-3 text-red-500 font-medium">
-                    ₹{c.pendingAmount}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {sortedPending.map((c, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center p-3 rounded-lg 
+                bg-white/60 dark:bg-gray-800 hover:scale-[1.02] transition"
+              >
+                <span>{c.customerName}</span>
+                <span className="text-red-500 font-medium">
+                  ₹{c.pendingAmount}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
+
     </div>
   );
 }
