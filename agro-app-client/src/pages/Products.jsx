@@ -12,7 +12,7 @@ function Products() {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     name: "",
@@ -25,25 +25,29 @@ function Products() {
   }, []);
 
   const fetchProducts = async () => {
-    const res = await getProducts();
-    setProducts(res.data);
+    try {
+      const res = await getProducts();
+      setProducts(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddProduct = async () => {
     if (!form.name || !form.price) {
-      setToast("⚠️ Name & Price required");
+      setToast("⚠️ Name & Price required (नाम और कीमत जरूरी है)");
       return;
     }
-
-    setLoading(true);
 
     try {
       if (editingId) {
         await updateProduct(editingId, form);
-        setToast("✅ Product updated");
+        setToast("✅ Product updated (उत्पाद अपडेट हुआ)");
       } else {
         await addProduct(form);
-        setToast("✅ Product added");
+        setToast("✅ Product added (उत्पाद जोड़ा गया)");
       }
 
       setForm({ name: "", price: "", quantity: "" });
@@ -51,20 +55,19 @@ function Products() {
       setShowForm(false);
       fetchProducts();
     } catch {
-      setToast("❌ Error occurred");
+      setToast("❌ Error occurred (कुछ गलत हुआ)");
     } finally {
-      setLoading(false);
       setTimeout(() => setToast(""), 2000);
     }
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm("Delete this product? (उत्पाद हटाना है?)")) return;
 
     await deleteProduct(id);
     fetchProducts();
 
-    setToast("🗑️ Product deleted");
+    setToast("🗑️ Product deleted (उत्पाद हटाया गया)");
     setTimeout(() => setToast(""), 2000);
   };
 
@@ -85,32 +88,32 @@ function Products() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="py-6 space-y-6 animate-fadeIn">
 
-      {/* 🔍 PREMIUM SEARCH */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="🔍 उत्पाद खोजें..."
-          className="w-full p-4 rounded-2xl 
-          bg-white/70 dark:bg-white/10 backdrop-blur-lg
-          border border-white/20
-          text-gray-800 dark:text-white
-          focus:ring-2 focus:ring-green-400 outline-none
-          shadow-lg"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      {/* 🔍 SEARCH */}
+      <input
+        type="text"
+        placeholder="🔍 उत्पाद खोजें (Search products)..."
+        className="w-full p-3 sm:p-4 rounded-xl 
+        bg-white/5 backdrop-blur-xl
+        border border-white/10
+        text-white
+        focus:ring-2 focus:ring-green-400 outline-none"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-      {/* 📦 MAIN CARD */}
-      <div className="bg-white/70 dark:bg-white/10 backdrop-blur-xl 
-        p-6 rounded-3xl shadow-xl border border-white/20">
+      {/* 📦 CARD */}
+      <div className="bg-white/5 backdrop-blur-xl 
+      border border-white/10 
+      p-4 sm:p-6 rounded-2xl shadow-lg">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            📦 उत्पाद सूची
+        <div className="flex flex-col sm:flex-row justify-between 
+        items-start sm:items-center gap-3 mb-6">
+
+          <h1 className="text-xl sm:text-2xl font-bold">
+            📦 उत्पाद सूची (Products)
           </h1>
 
           <button
@@ -119,28 +122,33 @@ function Products() {
               setEditingId(null);
               setForm({ name: "", price: "", quantity: "" });
             }}
-            className="bg-gradient-to-r from-green-500 to-green-600 
-            hover:scale-105 active:scale-95
-            text-white px-5 py-2 rounded-xl shadow-md transition"
+            className="w-full sm:w-auto bg-green-500 hover:bg-green-600 
+            text-white px-5 py-2 rounded-xl shadow-md transition hover:scale-105"
           >
             + नया उत्पाद
           </button>
         </div>
 
         {/* LIST */}
-        {filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-500 py-10">
-            कोई उत्पाद नहीं मिला 😕
-          </p>
+        {loading ? (
+          <p className="text-gray-400">Loading...</p>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-400 text-lg">
+              🚫 कोई उत्पाद नहीं मिला
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              (No products found)
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             {filteredProducts.map((p) => (
               <div
                 key={p.id}
-                className="flex justify-between items-center p-4 rounded-xl
-                bg-white/60 dark:bg-gray-800
-                hover:shadow-lg hover:scale-[1.01]
-                transition"
+                className="flex flex-col sm:flex-row justify-between 
+                sm:items-center gap-4 p-4 rounded-xl
+                bg-white/5 hover:scale-[1.02] hover:shadow-lg transition"
               >
                 {/* LEFT */}
                 <div className="flex items-center gap-4">
@@ -152,24 +160,25 @@ function Products() {
 
                   <div>
                     <p className="font-semibold text-lg">{p.name}</p>
-                    <p className="text-sm text-gray-500">
-                      मात्रा: {p.quantity}
+                    <p className="text-sm text-gray-400">
+                      मात्रा (Qty): {p.quantity}
                     </p>
                   </div>
                 </div>
 
                 {/* RIGHT */}
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col sm:flex-row 
+                items-start sm:items-center gap-3 sm:gap-6">
 
                   <span className="text-blue-500 font-bold text-lg">
                     ₹{p.price}
                   </span>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => handleEditProduct(p)}
                       className="px-3 py-1 rounded-lg 
-                      bg-blue-500 hover:bg-blue-600 text-white transition"
+                      bg-blue-500 hover:bg-blue-600 text-white shadow-md"
                     >
                       Edit
                     </button>
@@ -177,7 +186,7 @@ function Products() {
                     <button
                       onClick={() => handleDeleteProduct(p.id)}
                       className="px-3 py-1 rounded-lg 
-                      bg-red-500 hover:bg-red-600 text-white transition"
+                      bg-red-500 hover:bg-red-600 text-white shadow-md"
                     >
                       Delete
                     </button>
@@ -192,19 +201,21 @@ function Products() {
       {/* 🔥 MODAL */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center 
-        bg-black/50 backdrop-blur-sm">
+        bg-black/50 backdrop-blur-sm p-4">
 
           <div className="bg-white dark:bg-gray-800 
-            p-6 rounded-2xl shadow-xl w-[400px] animate-scaleIn">
+          p-6 rounded-2xl shadow-xl w-full max-w-md">
 
-            <h2 className="text-xl font-semibold mb-4 dark:text-white">
-              {editingId ? "✏️ उत्पाद संपादित करें" : "➕ नया उत्पाद"}
+            <h2 className="text-lg font-semibold mb-4">
+              {editingId
+                ? "✏️ उत्पाद संपादित करें"
+                : "➕ नया उत्पाद"}
             </h2>
 
             <div className="flex flex-col gap-3 mb-4">
               <input
                 className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="नाम"
+                placeholder="नाम (Name)"
                 value={form.name}
                 onChange={(e) =>
                   setForm({ ...form, name: e.target.value })
@@ -213,7 +224,7 @@ function Products() {
 
               <input
                 className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="कीमत"
+                placeholder="कीमत (Price)"
                 value={form.price}
                 onChange={(e) =>
                   setForm({ ...form, price: e.target.value })
@@ -222,7 +233,7 @@ function Products() {
 
               <input
                 className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="मात्रा"
+                placeholder="मात्रा (Quantity)"
                 value={form.quantity}
                 onChange={(e) =>
                   setForm({ ...form, quantity: e.target.value })
@@ -240,10 +251,9 @@ function Products() {
 
               <button
                 onClick={handleAddProduct}
-                disabled={loading}
                 className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
               >
-                {loading ? "Saving..." : "Save"}
+                Save
               </button>
             </div>
           </div>
@@ -253,7 +263,7 @@ function Products() {
       {/* 🔔 TOAST */}
       {toast && (
         <div className="fixed bottom-5 right-5 
-        bg-black text-white px-4 py-2 rounded-lg shadow-lg">
+        bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm">
           {toast}
         </div>
       )}

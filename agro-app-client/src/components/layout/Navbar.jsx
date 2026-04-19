@@ -42,11 +42,8 @@ function Navbar({ toggleSidebar }) {
   };
 
   const handleLogoClick = () => {
-    if (token) {
-      navigate("/home");
-    } else {
-      navigate("/login");
-    }
+    if (token) navigate("/home");
+    else navigate("/login");
   };
 
   const isAuthPage =
@@ -56,36 +53,39 @@ function Navbar({ toggleSidebar }) {
     <div className="sticky top-0 z-50 
       bg-gray-900/80 backdrop-blur-md text-white 
       border-b border-gray-700/50 
-      shadow-md px-6 py-3 flex justify-between items-center">
+      shadow-md px-3 sm:px-6 py-3 flex justify-between items-center">
 
-      {/* 🔥 LOGO */}
+      {/* 🌱 LOGO */}
       <div
         onClick={handleLogoClick}
-        className="flex items-center gap-3 cursor-pointer group"
+        className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
       >
-        <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-200 group-hover:text-green-400 transition">
+        <h1 className="text-sm sm:text-xl md:text-2xl font-semibold 
+        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate max-w-[150px] sm:max-w-none">
           उन्नतशील बीज भंडार
         </h1>
-        <span className="text-green-400 text-xl group-hover:scale-110 transition">
+
+        <span className="text-green-400 text-lg sm:text-xl 
+        group-hover:scale-110 transition">
           🌱
         </span>
       </div>
 
-      {/* RIGHT */}
-      <div className="flex items-center gap-4">
+      {/* RIGHT SIDE */}
+      <div className="flex items-center gap-2 sm:gap-4">
 
         {/* 🌙 THEME */}
         <button
           onClick={toggleTheme}
-          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
-          rounded-lg transition cursor-pointer"
+          className="px-2 sm:px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
+          rounded-lg transition text-sm sm:text-base"
         >
           {dark ? "☀️" : "🌙"}
         </button>
 
-        {/* AUTH */}
+        {/* 🔐 AUTH BUTTONS (HIDDEN ON VERY SMALL SCREEN) */}
         {!isAuthPage && !token && (
-          <>
+          <div className="hidden sm:flex items-center gap-3">
             <Link
               to="/login"
               className="text-gray-300 hover:text-white transition"
@@ -96,36 +96,36 @@ function Navbar({ toggleSidebar }) {
             <Link
               to="/signup"
               className="bg-green-500 hover:bg-green-600 
-              text-white px-4 py-1.5 rounded-lg 
+              text-white px-3 py-1.5 rounded-lg 
               transition shadow-md"
             >
               Signup
             </Link>
-          </>
+          </div>
         )}
 
-        {/* LOGOUT */}
+        {/* 🚪 LOGOUT */}
         {token && (
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 
-            px-4 py-1.5 rounded-lg 
-            transition shadow-md"
+            px-2 sm:px-4 py-1.5 rounded-lg 
+            transition shadow-md text-sm sm:text-base"
           >
             Logout
           </button>
         )}
 
-        {/* ☰ ADMIN */}
-        {toggleSidebar && role === "ADMIN" && (
-          <button
-            onClick={toggleSidebar}
-            className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
-            rounded-lg transition cursor-pointer"
-          >
-            ☰
-          </button>
-        )}
+        {/* ☰ SIDEBAR TOGGLE */}
+       {toggleSidebar && role === "ADMIN" && (
+  <button
+    onClick={toggleSidebar}
+    className="sm:hidden px-2 py-1.5 bg-gray-800 hover:bg-gray-700 
+    rounded-lg transition text-lg"
+  >
+    ☰
+  </button>
+)}
       </div>
     </div>
   );

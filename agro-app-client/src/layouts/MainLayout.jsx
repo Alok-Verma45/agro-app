@@ -3,24 +3,31 @@ import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 
 function MainLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
+  const [collapsed, setCollapsed] = useState(false); // desktop
 
   const role = localStorage.getItem("role");
 
   const linkClass = ({ isActive }) =>
-    `flex items-center ${
+    `relative flex items-center ${
       collapsed ? "justify-center" : "gap-3"
-    } px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
+    } px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
       isActive
-        ? "bg-green-500 text-white shadow-md"
-        : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
+        ? "bg-green-500/20 border border-green-400/30 text-green-400"
+        : "text-gray-300 hover:bg-gray-800"
     }`;
+
+  const menuItems = [
+    { to: "/dashboard", icon: "📊", label: "डैशबोर्ड (Dashboard)" },
+    { to: "/customers", icon: "👥", label: "ग्राहक (Customers)" },
+    { to: "/products", icon: "📦", label: "उत्पाद (Products)" },
+    { to: "/credits", icon: "💰", label: "उधारी (Credits)" },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col 
-      bg-gray-100 dark:bg-gray-950 
-      text-gray-900 dark:text-gray-100 transition-all duration-300">
+    bg-gray-100 dark:bg-gray-950 
+    text-gray-900 dark:text-gray-100">
 
       {/* NAVBAR */}
       <Navbar
@@ -31,64 +38,88 @@ function MainLayout() {
         }
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
+
+        {/* 🔥 MOBILE OVERLAY */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
         {/* 🔥 SIDEBAR */}
-        {role === "ADMIN" && sidebarOpen && (
+        {role === "ADMIN" && (
           <div
-            className={`${
-              collapsed ? "w-20" : "w-64"
-            } p-4 bg-white dark:bg-gray-900 
-            border-r border-gray-300 dark:border-gray-700
-            shadow-lg transition-all duration-300 flex flex-col`}
+            className={`
+              fixed md:static top-0 left-0 h-full z-40
+              ${collapsed ? "w-20" : "w-64"}
+              bg-gradient-to-b from-gray-900 to-gray-950
+              border-r border-white/10
+              shadow-xl transition-all duration-300 flex flex-col
+
+              ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+              md:translate-x-0
+            `}
           >
             {/* TOP */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between p-4 mb-4">
               {!collapsed && (
-                <h2 className="text-lg font-semibold text-green-500">
-                  📊 प्रबंधन
+                <h2 className="text-lg font-semibold text-green-400">
+                  📊 प्रबंधन (Management)
                 </h2>
               )}
 
-              {/* COLLAPSE BUTTON */}
+              {/* ❌ MOBILE PE HIDE */}
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="text-gray-500 hover:text-white cursor-pointer"
+                className="hidden md:block text-gray-400 hover:text-white"
               >
                 {collapsed ? "➡️" : "⬅️"}
               </button>
             </div>
 
             {/* NAV */}
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-2 px-2">
+              {menuItems.map((item, index) => (
+                <NavLink
+                  key={index}
+                  to={item.to}
+                  className={linkClass}
+                  onClick={() => setSidebarOpen(false)} // mobile close
+                >
+                  {/* ICON */}
+                  <span className="text-lg">{item.icon}</span>
 
-              <NavLink to="/dashboard" className={linkClass}>
-                <span>📊</span>
-                {!collapsed && "डैशबोर्ड"}
-              </NavLink>
+                  {/* TEXT */}
+                  {!collapsed && (
+                    <span className="text-sm">{item.label}</span>
+                  )}
 
-              <NavLink to="/customers" className={linkClass}>
-                <span>👥</span>
-                {!collapsed && "ग्राहक"}
-              </NavLink>
-
-              <NavLink to="/products" className={linkClass}>
-                <span>📦</span>
-                {!collapsed && "उत्पाद"}
-              </NavLink>
-
-              <NavLink to="/credits" className={linkClass}>
-                <span>💰</span>
-                {!collapsed && "उधारी"}
-              </NavLink>
-
+                  {/* TOOLTIP (desktop only) */}
+                  {collapsed && (
+                    <span
+                      className="hidden md:block absolute left-full ml-3 px-3 py-1 
+                      text-sm whitespace-nowrap 
+                      bg-black text-white rounded-md shadow-lg
+                      opacity-0 group-hover:opacity-100 
+                      translate-x-2 group-hover:translate-x-0
+                      transition-all duration-200 pointer-events-none z-50"
+                    >
+                      {item.label}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
             </nav>
           </div>
         )}
 
-        {/* CONTENT */}
+        {/* 🔥 CONTENT */}
         <div className="flex-1 transition-all duration-300">
-          <Outlet />
+          <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+            <Outlet />
+          </div>
         </div>
 
       </div>

@@ -6,12 +6,32 @@ function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  // 🔥 VALIDATION FUNCTION
+  const validate = () => {
     if (!form.email || !form.password) {
-      setError("⚠️ सभी फील्ड भरें");
+      return "⚠️ सभी फील्ड भरें (Fill all fields)";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      return "⚠️ सही Email डालें (Enter valid email)";
+    }
+
+    if (form.password.length < 4) {
+      return "⚠️ Password कम से कम 4 characters का होना चाहिए";
+    }
+
+    return null;
+  };
+
+  const handleLogin = async () => {
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -20,7 +40,6 @@ function Login() {
 
     try {
       const res = await loginUser(form);
-
       const role = res.data.role?.toUpperCase();
 
       localStorage.setItem("token", res.data.token);
@@ -33,7 +52,7 @@ function Login() {
       }
 
     } catch {
-      setError("❌ गलत जानकारी");
+      setError("❌ गलत जानकारी (Invalid credentials)");
     } finally {
       setLoading(false);
     }
@@ -41,26 +60,30 @@ function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center 
+    px-4 sm:px-6
     bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
 
       {/* 🔥 CARD */}
-      <div className="w-[350px] p-8 rounded-3xl 
+      <div className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-2xl sm:rounded-3xl 
       bg-white/10 backdrop-blur-xl border border-white/20 
       shadow-2xl">
 
-        {/* BRAND */}
+        {/* 🌱 BRAND */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-green-400">
+          <h1 className="text-xl sm:text-2xl font-bold text-green-400">
             उन्नतशील बीज भंडार 🌱
           </h1>
-          <p className="text-gray-300 text-sm mt-1">
-            आपका डिजिटल कृषि साथी
+          <p className="text-gray-300 text-xs sm:text-sm mt-1">
+            आपका डिजिटल कृषि साथी <br />
+            <span className="text-gray-400">
+              (Your Digital Farming Partner)
+            </span>
           </p>
         </div>
 
-        {/* TITLE */}
-        <h2 className="text-xl font-semibold text-center mb-4 text-white">
-          🔐 लॉगिन करें
+        {/* 🔐 TITLE */}
+        <h2 className="text-lg sm:text-xl font-semibold text-center mb-4 text-white">
+          🔐 लॉगिन करें (Login)
         </h2>
 
         {/* ERROR */}
@@ -70,25 +93,23 @@ function Login() {
           </p>
         )}
 
-        {/* EMAIL */}
-        <div className="mb-3">
-          <input
-            type="email"
-            placeholder="📧 Email"
-            className="w-full p-3 rounded-xl 
-            bg-white/20 text-white placeholder-gray-300
-            outline-none focus:ring-2 focus:ring-green-400"
-            value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
-          />
-        </div>
+        {/* 📧 EMAIL */}
+        <input
+          type="email"
+          placeholder="📧 Email"
+          className="w-full mb-3 p-3 rounded-xl 
+          bg-white/20 text-white placeholder-gray-300
+          outline-none focus:ring-2 focus:ring-green-400"
+          value={form.email}
+          onChange={(e) =>
+            setForm({ ...form, email: e.target.value })
+          }
+        />
 
-        {/* PASSWORD */}
-        <div className="mb-4">
+        {/* 🔑 PASSWORD WITH TOGGLE */}
+        <div className="relative mb-4">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="🔑 Password"
             className="w-full p-3 rounded-xl 
             bg-white/20 text-white placeholder-gray-300
@@ -98,23 +119,34 @@ function Login() {
               setForm({ ...form, password: e.target.value })
             }
           />
+
+          {/* 👁️ TOGGLE ICON */}
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-3 cursor-pointer text-gray-300 hover:text-white"
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </span>
         </div>
 
-        {/* BUTTON */}
+        {/* 🚀 BUTTON */}
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full py-2 rounded-xl 
+          className="w-full py-2.5 rounded-xl 
           bg-gradient-to-r from-green-500 to-green-600 
           hover:scale-105 active:scale-95
+          disabled:opacity-50
           text-white font-semibold transition"
         >
-          {loading ? "⏳ लॉगिन हो रहा है..." : "Login"}
+          {loading
+            ? "⏳ लॉगिन हो रहा है..."
+            : "Login (लॉगिन करें)"}
         </button>
 
-        {/* SIGNUP */}
-        <p className="text-sm text-center mt-5 text-gray-300">
-          खाता नहीं है?{" "}
+        {/* 🔗 SIGNUP */}
+        <p className="text-xs sm:text-sm text-center mt-5 text-gray-300">
+          खाता नहीं है? (Don't have an account?){" "}
           <Link to="/signup" className="text-green-400 hover:underline">
             Signup
           </Link>
