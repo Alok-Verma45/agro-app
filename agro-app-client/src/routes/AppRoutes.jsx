@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
 import Credits from "../pages/Credits";
+import BillingPage from "../pages/BillingPage"; // 🔥 NEW IMPORT
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 
@@ -43,6 +44,7 @@ function AppRoutes() {
             </AdminRoute>
           }
         />
+
         <Route
           path="/credits"
           element={
@@ -51,6 +53,7 @@ function AppRoutes() {
             </AdminRoute>
           }
         />
+
         <Route
           path="/products"
           element={
@@ -59,11 +62,22 @@ function AppRoutes() {
             </AdminRoute>
           }
         />
+
         <Route
           path="/customers"
           element={
             <AdminRoute>
               <Customers />
+            </AdminRoute>
+          }
+        />
+
+        {/* 🔥 NEW BILLING ROUTE */}
+        <Route
+          path="/billing"
+          element={
+            <AdminRoute>
+              <BillingPage />
             </AdminRoute>
           }
         />

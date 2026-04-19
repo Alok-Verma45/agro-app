@@ -85,35 +85,18 @@ function BillingPage() {
   return (
     <div className="py-6 space-y-6">
 
-      {/* HEADER + SUMMARY BAR */}
-      <div className="flex flex-col gap-4 mb-4">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-green-500 dark:text-green-400">
           🧾 Billing System
         </h1>
 
-        {/* 🔥 INLINE SUMMARY BAR (IMPROVED) */}
-        <div className="bg-gray-100 dark:bg-gray-800 
-        border border-gray-200 dark:border-white/10 
-        rounded-xl px-4 py-3 
-        flex flex-wrap justify-between items-center gap-4
-        text-gray-800 dark:text-white shadow-sm transition-all duration-300">
-
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Subtotal</p>
-            <p className="font-semibold">₹{subtotal}</p>
-          </div>
-
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">GST (18%)</p>
-            <p className="font-semibold">₹{gst.toFixed(2)}</p>
-          </div>
-
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-            <p className="font-bold text-green-600 dark:text-green-400 text-lg">
-              ₹{total.toFixed(2)}
-            </p>
-          </div>
+        {/* SUMMARY */}
+        <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-white/10 
+        p-4 rounded-xl text-sm text-gray-800 dark:text-white shadow">
+          <p>Subtotal: ₹{subtotal}</p>
+          <p>GST (18%): ₹{gst.toFixed(2)}</p>
+          <p className="text-green-600 dark:text-green-400 font-bold">Total: ₹{total.toFixed(2)}</p>
         </div>
       </div>
 

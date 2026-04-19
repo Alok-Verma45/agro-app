@@ -3,8 +3,8 @@ import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 
 function MainLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
-  const [collapsed, setCollapsed] = useState(false); // desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const role = localStorage.getItem("role");
 
@@ -13,8 +13,8 @@ function MainLayout() {
       collapsed ? "justify-center" : "gap-3"
     } px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
       isActive
-        ? "bg-green-500/20 border border-green-400/30 text-green-400"
-        : "text-gray-300 hover:bg-gray-800"
+        ? "bg-green-500/20 border border-green-400/30 text-green-500 dark:text-green-400"
+        : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
     }`;
 
   const menuItems = [
@@ -22,24 +22,23 @@ function MainLayout() {
     { to: "/customers", icon: "👥", label: "ग्राहक (Customers)" },
     { to: "/products", icon: "📦", label: "उत्पाद (Products)" },
     { to: "/credits", icon: "💰", label: "उधारी (Credits)" },
+    { to: "/billing", icon: "🧾", label: "बिलिंग (Billing)" },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col 
-    bg-gray-100 dark:bg-gray-950 
-    text-gray-900 dark:text-gray-100">
-
+    <div
+      className="min-h-screen flex flex-col 
+      bg-gray-100 dark:bg-gray-950 
+      text-gray-900 dark:text-gray-100 transition-colors duration-300"
+    >
       {/* NAVBAR */}
       <Navbar
         toggleSidebar={
-          role === "ADMIN"
-            ? () => setSidebarOpen(!sidebarOpen)
-            : null
+          role === "ADMIN" ? () => setSidebarOpen(!sidebarOpen) : null
         }
       />
 
       <div className="flex flex-1 relative">
-
         {/* 🔥 MOBILE OVERLAY */}
         {sidebarOpen && (
           <div
@@ -54,8 +53,10 @@ function MainLayout() {
             className={`
               fixed md:static top-0 left-0 h-full z-40
               ${collapsed ? "w-20" : "w-64"}
-              bg-gradient-to-b from-gray-900 to-gray-950
-              border-r border-white/10
+
+              bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-950
+              border-r border-gray-200 dark:border-white/10
+
               shadow-xl transition-all duration-300 flex flex-col
 
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -65,15 +66,14 @@ function MainLayout() {
             {/* TOP */}
             <div className="flex items-center justify-between p-4 mb-4">
               {!collapsed && (
-                <h2 className="text-lg font-semibold text-green-400">
+                <h2 className="text-lg font-semibold text-green-500 dark:text-green-400">
                   📊 प्रबंधन (Management)
                 </h2>
               )}
 
-              {/* ❌ MOBILE PE HIDE */}
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="hidden md:block text-gray-400 hover:text-white"
+                className="hidden md:block text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white"
               >
                 {collapsed ? "➡️" : "⬅️"}
               </button>
@@ -86,7 +86,7 @@ function MainLayout() {
                   key={index}
                   to={item.to}
                   className={linkClass}
-                  onClick={() => setSidebarOpen(false)} // mobile close
+                  onClick={() => setSidebarOpen(false)}
                 >
                   {/* ICON */}
                   <span className="text-lg">{item.icon}</span>
@@ -96,7 +96,7 @@ function MainLayout() {
                     <span className="text-sm">{item.label}</span>
                   )}
 
-                  {/* TOOLTIP (desktop only) */}
+                  {/* TOOLTIP */}
                   {collapsed && (
                     <span
                       className="hidden md:block absolute left-full ml-3 px-3 py-1 
@@ -121,7 +121,6 @@ function MainLayout() {
             <Outlet />
           </div>
         </div>
-
       </div>
     </div>
   );
