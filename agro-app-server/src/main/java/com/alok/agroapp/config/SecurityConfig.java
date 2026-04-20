@@ -65,9 +65,9 @@ public class SecurityConfig {
 
                         // 👤 USER → only home
                         .requestMatchers("/api/home/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/products/**").hasAnyRole("USER", "ADMIN")
 
                         // 👑 ADMIN only
-                        .requestMatchers("/api/products/**").hasRole("ADMIN")
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .requestMatchers("/api/credits/**").hasRole("ADMIN")
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
