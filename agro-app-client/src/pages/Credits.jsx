@@ -1,224 +1,280 @@
 import { useEffect, useState } from "react";
+import { getCredits, addCredit, addPayment } from "../api/creditApi";
 import { getCustomers } from "../api/customerApi";
 import { getProducts } from "../api/productApi";
 
-function BillingPage() {
+function Credits() {
+  const [credits, setCredits] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [toast, setToast] = useState("");
+  const [showPayModal, setShowPayModal] = useState(null);
+  const [payAmount, setPayAmount] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     customerId: "",
-    items: [{ productId: "", quantity: "", price: "" }],
+    productId: "",
+    quantity: "",
+    paidAmount: "",
   });
 
   useEffect(() => {
-    fetchData();
+    fetchAll();
   }, []);
 
-  const fetchData = async () => {
-    const [custRes, prodRes] = await Promise.all([
-      getCustomers(),
-      getProducts(),
-    ]);
-    setCustomers(custRes.data);
-    setProducts(prodRes.data);
-  };
+  const fetchAll = async () => {
+    try {
+      const [creditRes, custRes, prodRes] = await Promise.all([
+        getCredits(),
+        getCustomers(),
+        getProducts(),
+      ]);
 
-  const updateItem = (index, field, value) => {
-    const updated = [...form.items];
-
-    if (field === "productId") {
-      const product = products.find((p) => p.id === Number(value));
-      updated[index].productId = value;
-      updated[index].price = product?.price || "";
-    } else {
-      updated[index][field] = value === "" ? "" : Number(value);
+      setCredits(creditRes.data);
+      setCustomers(custRes.data);
+      setProducts(prodRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    setForm({ ...form, items: updated });
   };
 
-  const addItem = () => {
-    setForm({
-      ...form,
-      items: [...form.items, { productId: "", quantity: "", price: "" }],
-    });
-  };
-
-  const removeItem = (index) => {
-    if (form.items.length === 1) return;
-    setForm({
-      ...form,
-      items: form.items.filter((_, i) => i !== index),
-    });
-  };
-
-  const subtotal = form.items.reduce((sum, item) => {
-    const q = Number(item.quantity || 0);
-    const p = Number(item.price || 0);
-    return sum + q * p;
-  }, 0);
-
-  const gst = subtotal * 0.18;
-  const total = subtotal + gst;
-
-  const handleGenerate = () => {
-    if (!form.customerId) {
-      setToast("⚠️ Customer select karo");
+  const handleAddCredit = async () => {
+    if (!form.customerId || !form.productId || !form.quantity) {
+      setToast("⚠️ सभी फील्ड भरें (Fill all fields)");
       return;
     }
 
-    const validItems = form.items.filter(
-      (i) => i.productId && i.quantity > 0
-    );
+    await addCredit(form.customerId, {
+      product: { id: Number(form.productId) },
+      quantity: Number(form.quantity),
+      paidAmount: Number(form.paidAmount || 0),
+    });
 
-    if (validItems.length === 0) {
-      setToast("⚠️ Valid items add karo");
-      return;
-    }
-
-    setToast(`🧾 Invoice Generated: ₹${total.toFixed(2)}`);
+    setForm({ customerId: "", productId: "", quantity: "", paidAmount: "" });
+    setToast("✅ उधार जोड़ा गया (Credit added)");
+    fetchAll();
     setTimeout(() => setToast(""), 2000);
   };
 
+  const handlePay = async () => {
+    if (!payAmount) return;
+
+    await addPayment(showPayModal.id, Number(payAmount));
+
+    setShowPayModal(null);
+    setPayAmount("");
+    setToast("💰 भुगतान सफल (Payment success)");
+    fetchAll();
+    setTimeout(() => setToast(""), 2000);
+  };
+
+  const sortedCredits = [...credits].sort(
+    (a, b) => b.pendingAmount - a.pendingAmount
+  );
+
   return (
-    <div className="py-6 space-y-6">
+    <div className="py-6 space-y-6 animate-fadeIn">
 
-      {/* HEADER + SUMMARY BAR */}
-      <div className="flex flex-col gap-4 mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-green-500 dark:text-green-400">
-          🧾 Billing System
-        </h1>
+      {/* 🔥 HEADING */}
+      <h1 className="text-2xl sm:text-3xl font-bold text-green-400">
+        💳 उधार प्रबंधन (Credits Management)
+      </h1>
 
-        {/* 🔥 INLINE SUMMARY BAR (IMPROVED) */}
-        <div className="bg-gray-100 dark:bg-gray-800 
-        border border-gray-200 dark:border-white/10 
-        rounded-xl px-4 py-3 
-        flex flex-wrap justify-between items-center gap-4
-        text-gray-800 dark:text-white shadow-sm transition-all duration-300">
+      {/* 🔥 ADD CREDIT */}
+      <div className="bg-white/5 backdrop-blur-xl 
+      border border-white/10 
+      p-4 sm:p-6 rounded-2xl shadow-lg">
 
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Subtotal</p>
-            <p className="font-semibold">₹{subtotal}</p>
-          </div>
+        <h2 className="text-lg font-semibold mb-4">
+          ➕ नया उधार जोड़ें (Add Credit)
+        </h2>
 
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">GST (18%)</p>
-            <p className="font-semibold">₹{gst.toFixed(2)}</p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-            <p className="font-bold text-green-600 dark:text-green-400 text-lg">
-              ₹{total.toFixed(2)}
+          <select
+            className="p-3 rounded-xl bg-white/10"
+            value={form.customerId}
+            onChange={(e) =>
+              setForm({ ...form, customerId: e.target.value })
+            }
+          >
+            <option value="">ग्राहक (Customer)</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="p-3 rounded-xl bg-white/10"
+            value={form.productId}
+            onChange={(e) =>
+              setForm({ ...form, productId: e.target.value })
+            }
+          >
+            <option value="">उत्पाद (Product)</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} (₹{p.price})
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            placeholder="मात्रा (Qty)"
+            className="p-3 rounded-xl bg-white/10"
+            value={form.quantity}
+            onChange={(e) =>
+              setForm({ ...form, quantity: e.target.value })
+            }
+          />
+
+          <input
+            type="number"
+            placeholder="भुगतान (Paid)"
+            className="p-3 rounded-xl bg-white/10"
+            value={form.paidAmount}
+            onChange={(e) =>
+              setForm({ ...form, paidAmount: e.target.value })
+            }
+          />
+        </div>
+
+        <button
+          onClick={handleAddCredit}
+          className="mt-4 w-full sm:w-auto bg-green-500 hover:bg-green-600 
+          px-6 py-2 rounded-xl text-white transition hover:scale-105"
+        >
+          Add Credit
+        </button>
+      </div>
+
+      {/* 🔥 CREDIT LIST */}
+      <div className="bg-white/5 backdrop-blur-xl 
+      border border-white/10 
+      p-4 sm:p-6 rounded-2xl shadow-lg">
+
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">
+          📋 सभी उधार (All Credits)
+        </h2>
+
+        {loading ? (
+          <p className="text-gray-400">Loading...</p>
+        ) : sortedCredits.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-400 text-lg">
+              🚫 कोई डेटा उपलब्ध नहीं
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              (No data available)
             </p>
           </div>
-        </div>
-      </div>
+        ) : (
+          <div className="space-y-4">
+            {sortedCredits.map((c) => (
+              <div
+                key={c.id}
+                className={`p-4 rounded-xl flex flex-col sm:flex-row 
+                sm:justify-between sm:items-center gap-3
+                ${
+                  c.pendingAmount > 0
+                    ? "bg-red-500/10 border border-red-400/20"
+                    : "bg-white/5"
+                }
+                hover:scale-[1.02] transition`}
+              >
+                {/* LEFT */}
+                <div>
+                  <p className="font-semibold text-lg">
+                    {c.customer?.name}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {c.product?.name} • Qty: {c.quantity}
+                  </p>
+                </div>
 
-      {/* MAIN CARD */}
-      <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10
-      p-4 sm:p-6 rounded-2xl shadow-xl space-y-6 text-gray-800 dark:text-white">
+                {/* MIDDLE */}
+                <div className="flex flex-wrap gap-3 sm:gap-6 text-sm font-semibold">
+                  <span className="text-blue-400">₹{c.totalAmount}</span>
+                  <span className="text-green-400">₹{c.paidAmount}</span>
+                  <span className="text-red-400">₹{c.pendingAmount}</span>
+                </div>
 
-        {/* CUSTOMER */}
-        <select
-          className="p-3 rounded-xl bg-gray-100 dark:bg-white/10 w-full outline-none text-gray-900 dark:text-white"
-          style={{ colorScheme: 'light dark' }}
-          value={form.customerId}
-          onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-        >
-          <option value="" className="text-black bg-white dark:text-white dark:bg-gray-900">Select Customer</option>
-          {customers.map((c) => (
-            <option key={c.id} value={c.id} className="text-black bg-white dark:text-white dark:bg-gray-900">{c.name}</option>
-          ))}
-        </select>
+                {/* RIGHT */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      c.status === "PAID"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {c.status}
+                  </span>
 
-        {/* EMPTY STATE */}
-        {!form.customerId && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Please select a customer and add items
-          </p>
-        )}
-
-        {/* TABLE HEADER */}
-        <div className="hidden sm:grid grid-cols-5 text-gray-600 dark:text-gray-400 text-sm">
-          <span>Product</span>
-          <span>Qty</span>
-          <span>Price</span>
-          <span>Total</span>
-          <span>Action</span>
-        </div>
-
-        {/* ITEMS */}
-        {form.items.map((item, index) => (
-          <div key={index} className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
-
-            <select
-              className="p-2 rounded bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white"
-              style={{ colorScheme: 'light dark' }}
-              value={item.productId}
-              onChange={(e) => updateItem(index, "productId", e.target.value)}
-            >
-              <option value="" className="text-black bg-white dark:text-white dark:bg-gray-900">Product</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id} className="text-black bg-white dark:text-white dark:bg-gray-900">
-                  {p.name} (₹{p.price})
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="number"
-              placeholder="Qty"
-              min="1"
-              className="p-2 rounded bg-gray-100 dark:bg-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
-              value={item.quantity}
-              onChange={(e) => updateItem(index, "quantity", e.target.value)}
-            />
-
-            <input
-              type="number"
-              placeholder="Price"
-              className="p-2 rounded bg-gray-100 dark:bg-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
-              value={item.price}
-              onChange={(e) => updateItem(index, "price", e.target.value)}
-            />
-
-            <div className="font-semibold text-center">
-              ₹{(item.quantity || 0) * (item.price || 0)}
-            </div>
-
-            <button
-              onClick={() => removeItem(index)}
-              className="text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 p-2 rounded transition"
-            >
-              🗑️
-            </button>
+                  {c.status !== "PAID" && (
+                    <button
+                      onClick={() => setShowPayModal(c)}
+                      className="bg-yellow-500 hover:bg-yellow-600 
+                      text-white px-4 py-1 rounded-lg 
+                      shadow-lg hover:scale-105 transition"
+                    >
+                      Pay
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-
-        {/* ACTIONS */}
-        <div className="flex justify-between items-center flex-wrap gap-3">
-          <button
-            onClick={addItem}
-            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg text-white"
-          >
-            + Add Item
-          </button>
-
-          <button
-            onClick={handleGenerate}
-            className="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-lg text-white"
-          >
-            Generate Invoice
-          </button>
-        </div>
+        )}
       </div>
 
-      {/* TOAST */}
+      {/* 💰 MODAL */}
+      {showPayModal && (
+        <div className="fixed inset-0 flex items-center justify-center 
+        bg-black/50 backdrop-blur-sm p-4">
+
+          <div className="bg-white dark:bg-gray-800 
+          p-6 rounded-2xl shadow-xl w-full max-w-md">
+
+            <h2 className="text-lg font-semibold mb-4">
+              भुगतान करें (Make Payment)
+            </h2>
+
+            <input
+              type="number"
+              placeholder="Amount"
+              className="w-full p-3 rounded-lg mb-4 bg-gray-100 dark:bg-gray-700"
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowPayModal(null)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handlePay}
+                className="px-4 py-2 bg-green-500 text-white rounded"
+              >
+                Pay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔔 TOAST */}
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-black text-white px-4 py-2 rounded-lg shadow-lg">
+        <div className="fixed bottom-5 right-5 
+        bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm">
           {toast}
         </div>
       )}
@@ -226,4 +282,4 @@ function BillingPage() {
   );
 }
 
-export default BillingPage;
+export default Credits;

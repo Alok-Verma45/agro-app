@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 import Home from "../pages/Home";
+import ProductDetail from "../pages/ProductDetail";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route element={<MainLayout />}>
         {/* USER */}
         <Route path="/home" element={<Home />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
 
         {/* ADMIN */}
         <Route
