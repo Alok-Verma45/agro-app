@@ -49,8 +49,8 @@ function Credits() {
 
     await addCredit(form.customerId, {
       product: { id: Number(form.productId) },
-      quantity: Number(form.quantity),
-      paidAmount: Number(form.paidAmount || 0),
+      quantity: Number(form.quantity), // ✅ FIX
+      paidAmount: form.paidAmount ? Number(form.paidAmount) : 0, // ✅ FIX
     });
 
     setForm({ customerId: "", productId: "", quantity: "", paidAmount: "" });
@@ -62,7 +62,7 @@ function Credits() {
   const handlePay = async () => {
     if (!payAmount) return;
 
-    await addPayment(showPayModal.id, Number(payAmount));
+    await addPayment(showPayModal.id, Number(payAmount)); // ✅ FIX
 
     setShowPayModal(null);
     setPayAmount("");
@@ -78,12 +78,11 @@ function Credits() {
   return (
     <div className="py-6 space-y-6 animate-fadeIn">
 
-      {/* 🔥 HEADING */}
       <h1 className="text-2xl sm:text-3xl font-bold text-green-400">
         💳 उधार प्रबंधन (Credits Management)
       </h1>
 
-      {/* 🔥 ADD CREDIT */}
+      {/* ADD CREDIT */}
       <div className="bg-white/5 backdrop-blur-xl 
       border border-white/10 
       p-4 sm:p-6 rounded-2xl shadow-lg">
@@ -94,34 +93,53 @@ function Credits() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
+          {/* CUSTOMER */}
           <select
-            className="p-3 rounded-xl bg-white/10"
+            className="p-3 rounded-xl bg-white/10 text-white"
+            style={{ colorScheme: "light dark" }}
             value={form.customerId}
             onChange={(e) =>
               setForm({ ...form, customerId: e.target.value })
             }
           >
-            <option value="">ग्राहक (Customer)</option>
+            <option className="text-black bg-white dark:text-white dark:bg-gray-900" value="">
+              ग्राहक (Customer)
+            </option>
             {customers.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option
+                key={c.id}
+                value={c.id}
+                className="text-black bg-white dark:text-white dark:bg-gray-900"
+              >
+                {c.name}
+              </option>
             ))}
           </select>
 
+          {/* PRODUCT */}
           <select
-            className="p-3 rounded-xl bg-white/10"
+            className="p-3 rounded-xl bg-white/10 text-white"
+            style={{ colorScheme: "light dark" }}
             value={form.productId}
             onChange={(e) =>
               setForm({ ...form, productId: e.target.value })
             }
           >
-            <option value="">उत्पाद (Product)</option>
+            <option className="text-black bg-white dark:text-white dark:bg-gray-900" value="">
+              उत्पाद (Product)
+            </option>
             {products.map((p) => (
-              <option key={p.id} value={p.id}>
+              <option
+                key={p.id}
+                value={p.id}
+                className="text-black bg-white dark:text-white dark:bg-gray-900"
+              >
                 {p.name} (₹{p.price})
               </option>
             ))}
           </select>
 
+          {/* QTY */}
           <input
             type="number"
             placeholder="मात्रा (Qty)"
@@ -132,6 +150,7 @@ function Credits() {
             }
           />
 
+          {/* PAID */}
           <input
             type="number"
             placeholder="भुगतान (Paid)"
@@ -152,7 +171,7 @@ function Credits() {
         </button>
       </div>
 
-      {/* 🔥 CREDIT LIST */}
+      {/* CREDIT LIST */}
       <div className="bg-white/5 backdrop-blur-xl 
       border border-white/10 
       p-4 sm:p-6 rounded-2xl shadow-lg">
@@ -168,9 +187,6 @@ function Credits() {
             <p className="text-gray-400 text-lg">
               🚫 कोई डेटा उपलब्ध नहीं
             </p>
-            <p className="text-sm text-gray-500 mt-2">
-              (No data available)
-            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -183,10 +199,8 @@ function Credits() {
                   c.pendingAmount > 0
                     ? "bg-red-500/10 border border-red-400/20"
                     : "bg-white/5"
-                }
-                hover:scale-[1.02] transition`}
+                }`}
               >
-                {/* LEFT */}
                 <div>
                   <p className="font-semibold text-lg">
                     {c.customer?.name}
@@ -196,14 +210,12 @@ function Credits() {
                   </p>
                 </div>
 
-                {/* MIDDLE */}
                 <div className="flex flex-wrap gap-3 sm:gap-6 text-sm font-semibold">
                   <span className="text-blue-400">₹{c.totalAmount}</span>
                   <span className="text-green-400">₹{c.paidAmount}</span>
                   <span className="text-red-400">₹{c.pendingAmount}</span>
                 </div>
 
-                {/* RIGHT */}
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -219,8 +231,7 @@ function Credits() {
                     <button
                       onClick={() => setShowPayModal(c)}
                       className="bg-yellow-500 hover:bg-yellow-600 
-                      text-white px-4 py-1 rounded-lg 
-                      shadow-lg hover:scale-105 transition"
+                      text-white px-4 py-1 rounded-lg"
                     >
                       Pay
                     </button>
@@ -232,7 +243,7 @@ function Credits() {
         )}
       </div>
 
-      {/* 💰 MODAL */}
+      {/* MODAL */}
       {showPayModal && (
         <div className="fixed inset-0 flex items-center justify-center 
         bg-black/50 backdrop-blur-sm p-4">
@@ -271,7 +282,7 @@ function Credits() {
         </div>
       )}
 
-      {/* 🔔 TOAST */}
+      {/* TOAST */}
       {toast && (
         <div className="fixed bottom-5 right-5 
         bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm">

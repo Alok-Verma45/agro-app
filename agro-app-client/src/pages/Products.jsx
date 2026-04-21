@@ -41,12 +41,18 @@ function Products() {
       return;
     }
 
+    const payload = {
+      name: form.name,
+      price: Number(form.price),
+      quantity: form.quantity ? Number(form.quantity) : 0,
+    };
+
     try {
       if (editingId) {
-        await updateProduct(editingId, form);
+        await updateProduct(editingId, payload);
         setToast("✅ Product updated (उत्पाद अपडेट हुआ)");
       } else {
-        await addProduct(form);
+        await addProduct(payload);
         setToast("✅ Product added (उत्पाद जोड़ा गया)");
       }
 
@@ -90,7 +96,7 @@ function Products() {
   return (
     <div className="py-6 space-y-6 animate-fadeIn">
 
-      {/* 🔍 SEARCH */}
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="🔍 उत्पाद खोजें (Search products)..."
@@ -103,7 +109,7 @@ function Products() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* 📦 CARD */}
+      {/* CARD */}
       <div className="bg-white/5 backdrop-blur-xl 
       border border-white/10 
       p-4 sm:p-6 rounded-2xl shadow-lg">
@@ -150,7 +156,6 @@ function Products() {
                 sm:items-center gap-4 p-4 rounded-xl
                 bg-white/5 hover:scale-[1.02] hover:shadow-lg transition"
               >
-                {/* LEFT */}
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 flex items-center justify-center 
                   rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
@@ -166,7 +171,6 @@ function Products() {
                   </div>
                 </div>
 
-                {/* RIGHT */}
                 <div className="flex flex-col sm:flex-row 
                 items-start sm:items-center gap-3 sm:gap-6">
 
@@ -198,7 +202,7 @@ function Products() {
         )}
       </div>
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center 
         bg-black/50 backdrop-blur-sm p-4">
@@ -260,7 +264,7 @@ function Products() {
         </div>
       )}
 
-      {/* 🔔 TOAST */}
+      {/* TOAST */}
       {toast && (
         <div className="fixed bottom-5 right-5 
         bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm">
