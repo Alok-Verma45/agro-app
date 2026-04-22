@@ -73,13 +73,14 @@ function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4
-    bg-gray-100 dark:bg-gray-900">
+    bg-gradient-to-br from-gray-900 via-gray-800 to-black">
 
       <div className="w-full max-w-md p-6 rounded-2xl 
-      bg-white dark:bg-gray-800 shadow-xl space-y-5">
+      bg-gray-900/80 border border-gray-700
+      shadow-2xl space-y-5">
 
         {/* TITLE */}
-        <h1 className="text-xl font-semibold text-center text-gray-800 dark:text-white">
+        <h1 className="text-xl font-semibold text-center text-white">
           Reset Password 🔐
         </h1>
 
@@ -89,22 +90,21 @@ function ResetPassword() {
             type={showPass ? "text" : "password"}
             placeholder="New Password"
             className="w-full px-4 py-3 rounded-lg 
-            bg-gray-100 dark:bg-gray-700
-            text-gray-800 dark:text-white
-            outline-none focus:ring-2 focus:ring-green-500"
+            bg-gray-800 text-white placeholder-gray-400
+            outline-none focus:ring-2 focus:ring-green-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             onClick={() => setShowPass(!showPass)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
           >
             {showPass ? "🙈" : "👁️"}
           </button>
         </div>
 
         {/* 🔥 STRENGTH BAR */}
-        <div className="h-2 w-full bg-gray-300 rounded">
+        <div className="h-2 w-full bg-gray-700 rounded">
           <div
             className={`h-2 rounded ${getStrengthColor()}`}
             style={{ width: `${(strength / 4) * 100}%` }}
@@ -113,16 +113,16 @@ function ResetPassword() {
 
         {/* RULES */}
         <div className="text-xs space-y-1">
-          <p className={rules.length ? "text-green-500" : "text-gray-400"}>
+          <p className={rules.length ? "text-green-400" : "text-gray-500"}>
             • At least 6 characters
           </p>
-          <p className={rules.upper ? "text-green-500" : "text-gray-400"}>
+          <p className={rules.upper ? "text-green-400" : "text-gray-500"}>
             • One uppercase letter
           </p>
-          <p className={rules.number ? "text-green-500" : "text-gray-400"}>
+          <p className={rules.number ? "text-green-400" : "text-gray-500"}>
             • One number
           </p>
-          <p className={rules.special ? "text-green-500" : "text-gray-400"}>
+          <p className={rules.special ? "text-green-400" : "text-gray-500"}>
             • One special character
           </p>
         </div>
@@ -133,15 +133,14 @@ function ResetPassword() {
             type={showConfirm ? "text" : "password"}
             placeholder="Confirm Password"
             className="w-full px-4 py-3 rounded-lg 
-            bg-gray-100 dark:bg-gray-700
-            text-gray-800 dark:text-white
-            outline-none focus:ring-2 focus:ring-green-500"
+            bg-gray-800 text-white placeholder-gray-400
+            outline-none focus:ring-2 focus:ring-green-400"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
           />
           <button
             onClick={() => setShowConfirm(!showConfirm)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
           >
             {showConfirm ? "🙈" : "👁️"}
           </button>
@@ -150,7 +149,7 @@ function ResetPassword() {
         {/* MATCH CHECK */}
         {confirm && (
           <p className={`text-sm ${
-            password === confirm ? "text-green-500" : "text-red-500"
+            password === confirm ? "text-green-400" : "text-red-400"
           }`}>
             {password === confirm
               ? "✔ Passwords match"
@@ -173,7 +172,7 @@ function ResetPassword() {
         {/* MESSAGE */}
         {msg && (
           <p className={`text-center text-sm ${
-            isError ? "text-red-500" : "text-green-500"
+            isError ? "text-red-400" : "text-green-400"
           }`}>
             {msg}
           </p>

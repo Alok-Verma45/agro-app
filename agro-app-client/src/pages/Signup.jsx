@@ -42,7 +42,9 @@ function Signup() {
     return null;
   };
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault(); // 🔥 IMPORTANT (form submit)
+
     const validationError = validate();
     if (validationError) {
       setError(validationError);
@@ -72,10 +74,13 @@ function Signup() {
     px-4 sm:px-6
     bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
 
-      {/* 🔥 CARD */}
-      <div className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-2xl sm:rounded-3xl 
-      bg-white/10 backdrop-blur-xl border border-white/20 
-      shadow-2xl">
+      {/* 🔥 FORM WRAP */}
+      <form
+        onSubmit={handleSignup}
+        className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-2xl sm:rounded-3xl 
+        bg-white/10 backdrop-blur-xl border border-white/20 
+        shadow-2xl"
+      >
 
         {/* 🌱 BRAND */}
         <div className="text-center mb-6">
@@ -164,7 +169,7 @@ function Signup() {
 
         {/* 🚀 BUTTON */}
         <button
-          onClick={handleSignup}
+          type="submit" // 🔥 IMPORTANT
           disabled={loading}
           className="w-full py-2.5 rounded-xl 
           bg-gradient-to-r from-green-500 to-green-600 
@@ -184,7 +189,7 @@ function Signup() {
             Login
           </Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }
