@@ -10,6 +10,8 @@ import Credits from "../pages/Credits";
 import BillingPage from "../pages/BillingPage"; // 🔥 NEW IMPORT
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 // 🔥 ADMIN PROTECTED
 const AdminRoute = ({ children }) => {
@@ -30,6 +32,8 @@ function AppRoutes() {
       {/* AUTH */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* APP */}
       <Route element={<MainLayout />}>
