@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 
 import Home from "../pages/Home";
 import ProductDetail from "../pages/ProductDetail";
+import Cart from "../pages/Cart";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
@@ -40,6 +41,7 @@ function AppRoutes() {
         {/* USER */}
         <Route path="/home" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
 
         {/* ADMIN */}
         <Route

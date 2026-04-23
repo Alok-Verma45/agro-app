@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getCart } from "../../api/cartApi";
 
 function Navbar({ toggleSidebar }) {
   const [dark, setDark] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
   const location = useLocation();
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
+  // 🌙 THEME INIT
   useEffect(() => {
     const saved = localStorage.getItem("theme");
 
@@ -19,6 +23,41 @@ function Navbar({ toggleSidebar }) {
       document.documentElement.classList.remove("dark");
       setDark(false);
     }
+  }, []);
+
+  // 🛒 FETCH CART FROM BACKEND
+  const fetchCart = async () => {
+    try {
+      const res = await getCart();
+
+      const totalQty = res.data.items?.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      ) || 0;
+
+      setCartCount(totalQty);
+    } catch (err) {
+      console.error("Cart fetch error:", err);
+      setCartCount(0);
+    }
+  };
+
+  // 🔥 INITIAL LOAD
+  useEffect(() => {
+    if (token && role === "USER") {
+      fetchCart();
+    }
+  }, [token, role]);
+
+  // 🔥 LISTEN CART UPDATE EVENT
+  useEffect(() => {
+    const handleUpdate = () => fetchCart();
+
+    window.addEventListener("cartUpdated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleUpdate);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -61,7 +100,7 @@ function Navbar({ toggleSidebar }) {
         className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
       >
         <h1 className="text-sm sm:text-xl md:text-2xl font-semibold 
-        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate max-w-[150px] sm:max-w-none">
+        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate">
           उन्नतशील बीज भंडार
         </h1>
 
@@ -71,33 +110,48 @@ function Navbar({ toggleSidebar }) {
         </span>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT */}
       <div className="flex items-center gap-2 sm:gap-4">
+
+        {/* 🛒 CART (ONLY USER) */}
+        {token && role === "USER" && !isAuthPage && (
+          <button
+            onClick={() => navigate("/cart")}
+            className="relative px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
+            rounded-lg transition"
+          >
+            🛒
+
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 
+              bg-green-500 text-white text-xs px-1.5 py-0.5 
+              rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* 🌙 THEME */}
         <button
           onClick={toggleTheme}
           className="px-2 sm:px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
-          rounded-lg transition text-sm sm:text-base"
+          rounded-lg transition"
         >
           {dark ? "☀️" : "🌙"}
         </button>
 
-        {/* 🔐 AUTH BUTTONS (HIDDEN ON VERY SMALL SCREEN) */}
+        {/* 🔐 AUTH */}
         {!isAuthPage && !token && (
           <div className="hidden sm:flex items-center gap-3">
-            <Link
-              to="/login"
-              className="text-gray-300 hover:text-white transition"
-            >
+            <Link to="/login" className="text-gray-300 hover:text-white">
               Login
             </Link>
 
             <Link
               to="/signup"
               className="bg-green-500 hover:bg-green-600 
-              text-white px-3 py-1.5 rounded-lg 
-              transition shadow-md"
+              text-white px-3 py-1.5 rounded-lg"
             >
               Signup
             </Link>
@@ -109,23 +163,21 @@ function Navbar({ toggleSidebar }) {
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 
-            px-2 sm:px-4 py-1.5 rounded-lg 
-            transition shadow-md text-sm sm:text-base"
+            px-2 sm:px-4 py-1.5 rounded-lg"
           >
             Logout
           </button>
         )}
 
-        {/* ☰ SIDEBAR TOGGLE */}
-       {toggleSidebar && role === "ADMIN" && (
-  <button
-    onClick={toggleSidebar}
-    className="sm:hidden px-2 py-1.5 bg-gray-800 hover:bg-gray-700 
-    rounded-lg transition text-lg"
-  >
-    ☰
-  </button>
-)}
+        {/* ☰ SIDEBAR (ADMIN ONLY) */}
+        {toggleSidebar && role === "ADMIN" && (
+          <button
+            onClick={toggleSidebar}
+            className="sm:hidden px-2 py-1.5 bg-gray-800 rounded-lg"
+          >
+            ☰
+          </button>
+        )}
       </div>
     </div>
   );
