@@ -30,10 +30,8 @@ function Navbar({ toggleSidebar }) {
     try {
       const res = await getCart();
 
-      const totalQty = res.data.items?.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      ) || 0;
+      const totalQty =
+        res.data.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
       setCartCount(totalQty);
     } catch (err) {
@@ -89,30 +87,34 @@ function Navbar({ toggleSidebar }) {
     location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <div className="sticky top-0 z-50 
+    <div
+      className="sticky top-0 z-50 
       bg-gray-900/80 backdrop-blur-md text-white 
       border-b border-gray-700/50 
-      shadow-md px-3 sm:px-6 py-3 flex justify-between items-center">
-
+      shadow-md px-3 sm:px-6 py-3 flex justify-between items-center"
+    >
       {/* 🌱 LOGO */}
       <div
         onClick={handleLogoClick}
         className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
       >
-        <h1 className="text-sm sm:text-xl md:text-2xl font-semibold 
-        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate">
+        <h1
+          className="text-sm sm:text-xl md:text-2xl font-semibold 
+        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate"
+        >
           उन्नतशील बीज भंडार
         </h1>
 
-        <span className="text-green-400 text-lg sm:text-xl 
-        group-hover:scale-110 transition">
+        <span
+          className="text-green-400 text-lg sm:text-xl 
+        group-hover:scale-110 transition"
+        >
           🌱
         </span>
       </div>
 
       {/* RIGHT */}
       <div className="flex items-center gap-2 sm:gap-4">
-
         {/* 🛒 CART (ONLY USER) */}
         {token && role === "USER" && !isAuthPage && (
           <button
@@ -121,11 +123,12 @@ function Navbar({ toggleSidebar }) {
             rounded-lg transition"
           >
             🛒
-
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 
+              <span
+                className="absolute -top-2 -right-2 
               bg-green-500 text-white text-xs px-1.5 py-0.5 
-              rounded-full">
+              rounded-full"
+              >
                 {cartCount}
               </span>
             )}
@@ -166,6 +169,24 @@ function Navbar({ toggleSidebar }) {
             px-2 sm:px-4 py-1.5 rounded-lg"
           >
             Logout
+          </button>
+        )}
+        {/* Orders */}
+        {token && role === "USER" && (
+          <button
+            onClick={() => navigate("/orders")}
+            className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg"
+          >
+            📦 Orders
+          </button>
+        )}
+
+        {token && role === "ADMIN" && (
+          <button
+            onClick={() => navigate("/admin/orders")}
+            className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
+          >
+            Orders
           </button>
         )}
 
