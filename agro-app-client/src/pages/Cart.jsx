@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { getCart, removeItem, updateQuantity } from "../api/cartApi";
+import { placeOrder } from "../api/orderApi";
 
 function Cart() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+
+  // 🔥 NEW
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     fetchCart();
@@ -41,10 +46,7 @@ function Cart() {
 
   // ➕ INCREASE
   const increaseQty = async (item) => {
-    if (!item?.itemId) {
-      console.error("❌ Missing itemId:", item);
-      return;
-    }
+    if (!item?.itemId) return;
 
     setUpdatingId(item.itemId);
 
@@ -56,8 +58,6 @@ function Cart() {
       );
 
       updateLocalCart(updated);
-    } catch (err) {
-      console.error("❌ Increase error:", err);
     } finally {
       setUpdatingId(null);
     }
@@ -65,10 +65,7 @@ function Cart() {
 
   // ➖ DECREASE
   const decreaseQty = async (item) => {
-    if (!item?.itemId) {
-      console.error("❌ Missing itemId:", item);
-      return;
-    }
+    if (!item?.itemId) return;
 
     setUpdatingId(item.itemId);
 
@@ -88,8 +85,6 @@ function Cart() {
 
         updateLocalCart(updated);
       }
-    } catch (err) {
-      console.error("❌ Decrease error:", err);
     } finally {
       setUpdatingId(null);
     }
@@ -97,10 +92,7 @@ function Cart() {
 
   // ❌ REMOVE
   const handleRemove = async (itemId) => {
-    if (!itemId) {
-      console.error("❌ Missing itemId");
-      return;
-    }
+    if (!itemId) return;
 
     setUpdatingId(itemId);
 
@@ -110,10 +102,38 @@ function Cart() {
       const updated = cart.items.filter((i) => i.itemId !== itemId);
 
       updateLocalCart(updated);
-    } catch (err) {
-      console.error("❌ Remove error:", err);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  // 🔥 CHECKOUT
+  const handleCheckout = async () => {
+    try {
+      setPlacingOrder(true);
+
+      const res = await placeOrder();
+      console.log("✅ ORDER RESPONSE:", res.data);
+
+      // 🔥 show success FIRST
+      setToast("🎉 Order placed successfully!");
+
+      // 🔥 delay UI change
+      setTimeout(() => {
+        // cart clear after user sees message
+        setCart({ items: [], totalAmount: 0 });
+
+        window.dispatchEvent(new Event("cartUpdated"));
+
+        // optional redirect
+        window.location.href = "/home"; // ya /orders
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+
+      setToast(err?.response?.data?.error || "❌ Failed to place order");
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
@@ -145,11 +165,12 @@ function Cart() {
     bg-gray-100 dark:bg-gray-900 
     text-gray-800 dark:text-white"
     >
+      {/* 🔙 BACK */}
       <button
         onClick={() => window.history.back()}
         className="flex items-center gap-2 mb-4 
-  text-sm text-gray-500 dark:text-gray-400 
-  hover:text-green-500 transition"
+        text-sm text-gray-500 dark:text-gray-400 
+        hover:text-green-500 transition"
       >
         <span className="text-lg">←</span>
         Back
@@ -167,18 +188,16 @@ function Cart() {
               bg-white dark:bg-gray-800 
               p-4 rounded-xl shadow"
             >
-              {/* LEFT */}
               <div>
                 <p className="font-semibold text-lg">{item.productName}</p>
                 <p className="text-sm text-gray-500">₹{item.priceAtTime}</p>
               </div>
 
-              {/* QTY */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => decreaseQty(item)}
                   disabled={updatingId === item.itemId}
-                  className="px-3 py-1 bg-red-500 text-white rounded disabled:opacity-50"
+                  className="px-3 py-1 bg-red-500 text-white rounded"
                 >
                   -
                 </button>
@@ -188,13 +207,12 @@ function Cart() {
                 <button
                   onClick={() => increaseQty(item)}
                   disabled={updatingId === item.itemId}
-                  className="px-3 py-1 bg-green-500 text-white rounded disabled:opacity-50"
+                  className="px-3 py-1 bg-green-500 text-white rounded"
                 >
                   +
                 </button>
               </div>
 
-              {/* PRICE */}
               <div className="flex items-center gap-4">
                 <span className="font-semibold">
                   ₹{item.priceAtTime * item.quantity}
@@ -202,7 +220,6 @@ function Cart() {
 
                 <button
                   onClick={() => handleRemove(item.itemId)}
-                  disabled={updatingId === item.itemId}
                   className="text-red-500 text-lg"
                 >
                   ✕
@@ -236,11 +253,28 @@ function Cart() {
             <span className="text-green-500">₹{total.toFixed(2)}</span>
           </div>
 
-          <button className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition">
-            Checkout 🚀
+          <button
+            onClick={handleCheckout}
+            disabled={placingOrder}
+            className="w-full py-3 bg-green-500 hover:bg-green-600 
+            text-white rounded-xl font-semibold transition 
+            disabled:opacity-50"
+          >
+            {placingOrder ? "Placing..." : "Checkout 🚀"}
           </button>
         </div>
       </div>
+
+      {/* 🔔 TOAST */}
+      {toast && (
+        <div
+          className="fixed bottom-5 right-5 
+  bg-green-600 text-white px-6 py-3 rounded-lg 
+  shadow-xl text-sm font-medium animate-bounce"
+        >
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
