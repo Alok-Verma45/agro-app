@@ -4,6 +4,8 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
+import Orders from "../pages/Orders";
+import OrderDetails from "../pages/OrderDetails";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
@@ -13,6 +15,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import AdminOrders from "../pages/AdminOrders";
 
 // 🔥 ADMIN PROTECTED
 const AdminRoute = ({ children }) => {
@@ -42,6 +45,8 @@ function AppRoutes() {
         <Route path="/home" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:id" element={<OrderDetails />} />
 
         {/* ADMIN */}
         <Route
@@ -86,6 +91,15 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <BillingPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
             </AdminRoute>
           }
         />
