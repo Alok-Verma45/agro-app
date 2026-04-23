@@ -1,6 +1,7 @@
 package com.alok.agroapp.controller;
 
 import com.alok.agroapp.dto.OrderResponse;
+import com.alok.agroapp.entity.enums.OrderStatus;
 import com.alok.agroapp.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,13 @@ public class OrderController {
         OrderResponse order = orderService.getOrderById(id);
 
         return ResponseEntity.ok(order);
+    }
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(
+            @PathVariable Long id,
+            @RequestParam OrderStatus status) {
+
+        orderService.updateOrderStatus(id, status);
+        return ResponseEntity.ok(Map.of("message", "Status updated"));
     }
 }
