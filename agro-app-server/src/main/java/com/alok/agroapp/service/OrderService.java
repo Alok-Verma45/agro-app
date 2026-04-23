@@ -2,6 +2,7 @@ package com.alok.agroapp.service;
 
 import com.alok.agroapp.dto.OrderResponse;
 import com.alok.agroapp.entity.Order;
+import com.alok.agroapp.entity.enums.OrderStatus;
 
 import java.util.List;
 
@@ -11,4 +12,5 @@ public interface OrderService {
     List<OrderResponse> getMyOrders();
     List<OrderResponse> getAllOrders();
     OrderResponse getOrderById(Long id);
+    void updateOrderStatus(Long id, OrderStatus status);
 }

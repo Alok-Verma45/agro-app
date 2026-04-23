@@ -95,11 +95,18 @@ public class CartServiceImpl implements CartService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // 🔥 FIX: never throw error for empty cart
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Cart is empty"));
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    newCart.setItems(new ArrayList<>());
+                    newCart.setTotalAmount(BigDecimal.ZERO);
+                    return newCart;
+                });
 
-        if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new RuntimeException("Cart is empty");
+        if (cart.getItems() == null) {
+            cart.setItems(new ArrayList<>());
         }
 
         List<CartItemResponse> items = cart.getItems().stream()

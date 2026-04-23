@@ -161,6 +161,56 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void updateOrderStatus(Long id, OrderStatus newStatus) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        OrderStatus currentStatus = order.getStatus();
+
+        // 🔥 VALIDATION (existing)
+        switch (currentStatus) {
+
+            case PLACED:
+                if (newStatus != OrderStatus.CONFIRMED && newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException("Invalid status transition from PLACED");
+                }
+                break;
+
+            case CONFIRMED:
+                if (newStatus != OrderStatus.SHIPPED && newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException("Invalid status transition from CONFIRMED");
+                }
+                break;
+
+            case SHIPPED:
+                if (newStatus != OrderStatus.DELIVERED) {
+                    throw new RuntimeException("Invalid status transition from SHIPPED");
+                }
+                break;
+
+            case DELIVERED:
+            case CANCELLED:
+                throw new RuntimeException("Order already completed. No further changes allowed");
+        }
+
+        // 🔥 ⭐ IMPORTANT LOGIC (ADD THIS)
+        if (newStatus == OrderStatus.CANCELLED) {
+
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+
+                product.setQuantity(
+                        product.getQuantity() + item.getQuantity()
+                );
+            }
+        }
+
+        order.setStatus(newStatus);
+    }
+
     // 🔥 COMMON MAPPER (CLEAN CODE 🔥)
     private List<OrderResponse> mapOrdersToResponse(List<Order> orders) {
 
