@@ -28,16 +28,26 @@ public class CartServiceImpl implements CartService {
         this.userRepository = userRepository;
     }
 
+    // 🔥 COMMON METHOD (no duplication)
+    private BigDecimal calculateTotal(Cart cart) {
+        return cart.getItems().stream()
+                .map(item -> item.getPriceAtTime()
+                        .multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     @Override
     public void addToCart(Long productId, int quantity) {
 
-        // 🔥 1. Get logged-in user
+        if (quantity <= 0) {
+            throw new RuntimeException("Quantity must be greater than 0");
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥 2. Get or create cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -47,40 +57,33 @@ public class CartServiceImpl implements CartService {
                     return newCart;
                 });
 
-        // 🔥 3. Get product
+        // 🔥 Null safety
+        if (cart.getItems() == null) {
+            cart.setItems(new ArrayList<>());
+        }
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // 🔥 4. Check if item already exists
         Optional<CartItem> existingItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst();
 
         if (existingItem.isPresent()) {
-            // ✔ Increase quantity
             CartItem item = existingItem.get();
             item.setQuantity(item.getQuantity() + quantity);
         } else {
-            // ✔ Add new item
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .product(product)
                     .quantity(quantity)
-                    .priceAtTime(product.getPrice()) // 🔥 important
+                    .priceAtTime(product.getPrice())
                     .build();
 
             cart.getItems().add(newItem);
         }
 
-        // 🔥 5. Recalculate total
-        BigDecimal total = cart.getItems().stream()
-                .map(item -> item.getPriceAtTime()
-                        .multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        cart.setTotalAmount(total);
-
-        // 🔥 6. Save cart
+        cart.setTotalAmount(calculateTotal(cart));
         cartRepository.save(cart);
     }
 
@@ -95,9 +98,13 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart is empty"));
 
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
+            throw new RuntimeException("Cart is empty");
+        }
+
         List<CartItemResponse> items = cart.getItems().stream()
                 .map(item -> new CartItemResponse(
-                        item.getId(),   // 🔥 ADD THIS
+                        item.getId(),
                         item.getProduct().getName(),
                         item.getQuantity(),
                         item.getPriceAtTime()
@@ -114,68 +121,53 @@ public class CartServiceImpl implements CartService {
     @Override
     public void removeItem(Long itemId) {
 
-        // 🔥 1. Get logged-in user
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥 2. Get cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        // 🔥 3. Find item
         CartItem itemToRemove = cart.getItems().stream()
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Item not found in cart"));
 
-        // 🔥 4. Remove item
         cart.getItems().remove(itemToRemove);
 
-        // 🔥 5. Recalculate total
-        BigDecimal total = cart.getItems().stream()
-                .map(item -> item.getPriceAtTime()
-                        .multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        cart.setTotalAmount(total);
-
-        // 🔥 6. Save cart
+        cart.setTotalAmount(calculateTotal(cart));
         cartRepository.save(cart);
     }
 
     @Override
     public void updateQuantity(Long itemId, int quantity) {
 
-        // 🔥 1. Get user
+        if (quantity < 0) {
+            throw new RuntimeException("Quantity cannot be negative");
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥 2. Get cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        // 🔥 3. Find item
         CartItem item = cart.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
-        // 🔥 4. Update quantity
-        item.setQuantity(quantity);
+        // 🔥 If quantity = 0 → remove item
+        if (quantity == 0) {
+            cart.getItems().remove(item);
+        } else {
+            item.setQuantity(quantity);
+        }
 
-        // 🔥 5. Recalculate total
-        BigDecimal total = cart.getItems().stream()
-                .map(i -> i.getPriceAtTime()
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        cart.setTotalAmount(total);
-
-        // 🔥 6. Save
+        cart.setTotalAmount(calculateTotal(cart));
         cartRepository.save(cart);
     }
 }
