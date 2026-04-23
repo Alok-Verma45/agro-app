@@ -2,9 +2,12 @@ package com.alok.agroapp.controller;
 
 import com.alok.agroapp.dto.OrderResponse;
 import com.alok.agroapp.service.OrderService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -18,23 +21,39 @@ public class OrderController {
 
     // 🔥 Place Order API
     @PostMapping("/place")
-    public String placeOrder() {
+    public ResponseEntity<Map<String, String>> placeOrder() {
+
         orderService.placeOrder();
-        return "Order placed successfully";
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED) // 201
+                .body(Map.of("message", "Order placed successfully"));
     }
 
+    // 🔥 USER → My Orders
     @GetMapping("/my")
-    public List<OrderResponse> getMyOrders() {
-        return orderService.getMyOrders();
+    public ResponseEntity<List<OrderResponse>> getMyOrders() {
+
+        List<OrderResponse> orders = orderService.getMyOrders();
+
+        return ResponseEntity.ok(orders); // 200
     }
 
+    // 🔥 ADMIN → All Orders
     @GetMapping("/all")
-    public List<OrderResponse> getAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+
+        List<OrderResponse> orders = orderService.getAllOrders();
+
+        return ResponseEntity.ok(orders);
     }
 
+    // 🔥 Order Details
     @GetMapping("/{id:\\d+}")
-    public OrderResponse getOrderById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+
+        OrderResponse order = orderService.getOrderById(id);
+
+        return ResponseEntity.ok(order);
     }
 }
