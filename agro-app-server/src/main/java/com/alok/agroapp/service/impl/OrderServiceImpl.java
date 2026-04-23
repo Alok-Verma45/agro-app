@@ -1,5 +1,7 @@
 package com.alok.agroapp.service.impl;
 
+import com.alok.agroapp.dto.OrderItemResponse;
+import com.alok.agroapp.dto.OrderResponse;
 import com.alok.agroapp.entity.*;
 import com.alok.agroapp.entity.enums.OrderStatus;
 import com.alok.agroapp.repository.CartRepository;
@@ -34,24 +36,20 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void placeOrder() {
 
-        // 🔥 1. Get user
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥 2. Get cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        // 🔥 3. Check empty
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        // 🔥 4. Validate stock
+        // 🔥 Validate stock
         for (CartItem item : cart.getItems()) {
-
             Product product = item.getProduct();
 
             if (product.getQuantity() < item.getQuantity()) {
@@ -61,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // 🔥 5. Create Order
+        // 🔥 Create Order
         Order order = Order.builder()
                 .user(user)
                 .totalAmount(cart.getTotalAmount())
@@ -69,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.PLACED)
                 .build();
 
-        // 🔥 6. Create OrderItems
+        // 🔥 Create OrderItems
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cart.getItems()) {
@@ -84,23 +82,106 @@ public class OrderServiceImpl implements OrderService {
             orderItems.add(orderItem);
         }
 
-        // 🔥 7. Attach items
         order.setItems(orderItems);
 
-        // 🔥 8. Reduce stock
+        // 🔥 Reduce stock
         for (CartItem cartItem : cart.getItems()) {
-
             Product product = cartItem.getProduct();
-
             product.setQuantity(product.getQuantity() - cartItem.getQuantity());
         }
 
-        // 🔥 9. Save order (cascade saves items)
+        // 🔥 Save order
         orderRepository.save(order);
 
-        // 🔥 10. Clear cart
+        // 🔥 Clear cart
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
         cartRepository.save(cart);
+    }
+
+    // 🔥 USER → get own orders (DTO)
+    @Override
+    public List<OrderResponse> getMyOrders() {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepository.findByUser(user);
+
+        return mapOrdersToResponse(orders);
+    }
+
+    // 🔥 ADMIN → get all orders (DTO)
+    @Override
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        return mapOrdersToResponse(orders);
+    }
+
+    @Override
+    public OrderResponse getOrderById(Long id) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // 🔥 SECURITY CHECK
+        boolean isOwner = order.getUser().getId().equals(user.getId());
+        boolean isAdmin = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("You are not authorized to view this order");
+        }
+
+        // 🔥 Map to DTO
+        List<OrderItemResponse> items = order.getItems().stream()
+                .map(item -> OrderItemResponse.builder()
+                        .productName(item.getProduct().getName())
+                        .quantity(item.getQuantity())
+                        .price(item.getPrice())
+                        .build())
+                .toList();
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .createdAt(order.getCreatedAt())
+                .status(order.getStatus().name())
+                .items(items)
+                .build();
+    }
+
+    // 🔥 COMMON MAPPER (CLEAN CODE 🔥)
+    private List<OrderResponse> mapOrdersToResponse(List<Order> orders) {
+
+        return orders.stream().map(order -> {
+
+            List<OrderItemResponse> items = order.getItems().stream()
+                    .map(item -> OrderItemResponse.builder()
+                            .productName(item.getProduct().getName())
+                            .quantity(item.getQuantity())
+                            .price(item.getPrice())
+                            .build())
+                    .toList();
+
+            return OrderResponse.builder()
+                    .id(order.getId())
+                    .totalAmount(order.getTotalAmount())
+                    .createdAt(order.getCreatedAt())
+                    .status(order.getStatus().name())
+                    .items(items)
+                    .build();
+
+        }).toList();
     }
 }

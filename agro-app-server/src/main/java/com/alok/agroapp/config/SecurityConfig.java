@@ -73,7 +73,6 @@ public class SecurityConfig {
 
                         // 🔴 ADMIN only
                         .requestMatchers("/api/orders/all").hasRole("ADMIN")
-                        .requestMatchers("/api/orders/{id}").hasRole("ADMIN")
 
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .requestMatchers("/api/credits/**").hasRole("ADMIN")
