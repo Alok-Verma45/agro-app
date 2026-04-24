@@ -6,11 +6,14 @@ import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
+import Checkout from "../pages/Checkout";
+import PaymentSuccess from "../pages/PaymentSuccess";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
 import Credits from "../pages/Credits";
-import BillingPage from "../pages/BillingPage"; // 🔥 NEW IMPORT
+import BillingPage from "../pages/BillingPage";
+import AdminUsers from '../pages/AdminUsers';
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -47,6 +50,8 @@ function AppRoutes() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         {/* ADMIN */}
         <Route
@@ -100,6 +105,14 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <AdminOrders />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
             </AdminRoute>
           }
         />

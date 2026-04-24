@@ -21,6 +21,10 @@ function MainLayout() {
     { to: "/dashboard", icon: "📊", label: "डैशबोर्ड (Dashboard)" },
     { to: "/customers", icon: "👥", label: "ग्राहक (Customers)" },
     { to: "/products", icon: "📦", label: "उत्पाद (Products)" },
+
+    // 🔥 NEW USERS PAGE
+    { to: "/admin/users", icon: "🧑‍💼", label: "यूज़र्स (Users)" },
+
     { to: "/credits", icon: "💰", label: "उधारी (Credits)" },
     { to: "/billing", icon: "🧾", label: "बिलिंग (Billing)" },
   ];
@@ -39,7 +43,7 @@ function MainLayout() {
       />
 
       <div className="flex flex-1 relative">
-        {/* 🔥 MOBILE OVERLAY */}
+        {/* MOBILE OVERLAY */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/40 z-30 md:hidden"
@@ -47,7 +51,7 @@ function MainLayout() {
           />
         )}
 
-        {/* 🔥 SIDEBAR */}
+        {/* SIDEBAR */}
         {role === "ADMIN" && (
           <div
             className={`
@@ -115,7 +119,7 @@ function MainLayout() {
           </div>
         )}
 
-        {/* 🔥 CONTENT */}
+        {/* CONTENT */}
         <div className="flex-1 transition-all duration-300">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
             <Outlet />

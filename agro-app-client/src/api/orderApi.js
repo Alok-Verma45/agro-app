@@ -6,9 +6,13 @@ const getAuthHeader = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
-// 🔥 PLACE ORDER
-export const placeOrder = () => {
-  return axios.post(`${API}/place`, {}, {
-    headers: getAuthHeader(),
-  });
+// 🔥 PLACE ORDER WITH ADDRESS DATA
+export const placeOrder = (orderData) => {
+  return axios.post(
+    `${API}/place`,
+    orderData,
+    {
+      headers: getAuthHeader(),
+    }
+  );
 };

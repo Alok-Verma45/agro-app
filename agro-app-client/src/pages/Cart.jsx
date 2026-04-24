@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { getCart, removeItem, updateQuantity } from "../api/cartApi";
-import { placeOrder } from "../api/orderApi";
 
 function Cart() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
-
-  // 🔥 NEW
-  const [placingOrder, setPlacingOrder] = useState(false);
-  const [toast, setToast] = useState("");
 
   useEffect(() => {
     fetchCart();
@@ -32,7 +27,7 @@ function Cart() {
   const updateLocalCart = (updatedItems) => {
     const total = updatedItems.reduce(
       (sum, i) => sum + i.priceAtTime * i.quantity,
-      0,
+      0
     );
 
     setCart((prev) => ({
@@ -54,7 +49,9 @@ function Cart() {
       await updateQuantity(item.itemId, item.quantity + 1);
 
       const updated = cart.items.map((i) =>
-        i.itemId === item.itemId ? { ...i, quantity: i.quantity + 1 } : i,
+        i.itemId === item.itemId
+          ? { ...i, quantity: i.quantity + 1 }
+          : i
       );
 
       updateLocalCart(updated);
@@ -73,14 +70,18 @@ function Cart() {
       if (item.quantity <= 1) {
         await removeItem(item.itemId);
 
-        const updated = cart.items.filter((i) => i.itemId !== item.itemId);
+        const updated = cart.items.filter(
+          (i) => i.itemId !== item.itemId
+        );
 
         updateLocalCart(updated);
       } else {
         await updateQuantity(item.itemId, item.quantity - 1);
 
         const updated = cart.items.map((i) =>
-          i.itemId === item.itemId ? { ...i, quantity: i.quantity - 1 } : i,
+          i.itemId === item.itemId
+            ? { ...i, quantity: i.quantity - 1 }
+            : i
         );
 
         updateLocalCart(updated);
@@ -99,7 +100,9 @@ function Cart() {
     try {
       await removeItem(itemId);
 
-      const updated = cart.items.filter((i) => i.itemId !== itemId);
+      const updated = cart.items.filter(
+        (i) => i.itemId !== itemId
+      );
 
       updateLocalCart(updated);
     } finally {
@@ -107,34 +110,9 @@ function Cart() {
     }
   };
 
-  // 🔥 CHECKOUT
-  const handleCheckout = async () => {
-    try {
-      setPlacingOrder(true);
-
-      const res = await placeOrder();
-      console.log("✅ ORDER RESPONSE:", res.data);
-
-      // 🔥 show success FIRST
-      setToast("🎉 Order placed successfully!");
-
-      // 🔥 delay UI change
-      setTimeout(() => {
-        // cart clear after user sees message
-        setCart({ items: [], totalAmount: 0 });
-
-        window.dispatchEvent(new Event("cartUpdated"));
-
-        // optional redirect
-        window.location.href = "/home"; // ya /orders
-      }, 1500);
-    } catch (err) {
-      console.error(err);
-
-      setToast(err?.response?.data?.error || "❌ Failed to place order");
-    } finally {
-      setPlacingOrder(false);
-    }
+  // 🔥 UPDATED CHECKOUT
+  const handleCheckout = () => {
+    window.location.href = "/checkout";
   };
 
   // 🧠 STATES
@@ -162,8 +140,8 @@ function Cart() {
   return (
     <div
       className="min-h-screen px-4 py-6 
-    bg-gray-100 dark:bg-gray-900 
-    text-gray-800 dark:text-white"
+      bg-gray-100 dark:bg-gray-900 
+      text-gray-800 dark:text-white"
     >
       {/* 🔙 BACK */}
       <button
@@ -176,7 +154,9 @@ function Cart() {
         Back
       </button>
 
-      <h1 className="text-2xl font-bold mb-6">🛒 Your Cart</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        🛒 Your Cart
+      </h1>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* ITEMS */}
@@ -189,8 +169,12 @@ function Cart() {
               p-4 rounded-xl shadow"
             >
               <div>
-                <p className="font-semibold text-lg">{item.productName}</p>
-                <p className="text-sm text-gray-500">₹{item.priceAtTime}</p>
+                <p className="font-semibold text-lg">
+                  {item.productName}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ₹{item.priceAtTime}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -232,9 +216,11 @@ function Cart() {
         {/* SUMMARY */}
         <div
           className="bg-white dark:bg-gray-800 
-        p-5 rounded-xl shadow space-y-4 h-fit"
+          p-5 rounded-xl shadow space-y-4 h-fit"
         >
-          <h2 className="font-semibold text-lg">Order Summary</h2>
+          <h2 className="font-semibold text-lg">
+            Order Summary
+          </h2>
 
           <div className="flex justify-between">
             <span>Subtotal</span>
@@ -250,31 +236,20 @@ function Cart() {
 
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span className="text-green-500">₹{total.toFixed(2)}</span>
+            <span className="text-green-500">
+              ₹{total.toFixed(2)}
+            </span>
           </div>
 
           <button
             onClick={handleCheckout}
-            disabled={placingOrder}
             className="w-full py-3 bg-green-500 hover:bg-green-600 
-            text-white rounded-xl font-semibold transition 
-            disabled:opacity-50"
+            text-white rounded-xl font-semibold transition"
           >
-            {placingOrder ? "Placing..." : "Checkout 🚀"}
+            Checkout 🚀
           </button>
         </div>
       </div>
-
-      {/* 🔔 TOAST */}
-      {toast && (
-        <div
-          className="fixed bottom-5 right-5 
-  bg-green-600 text-white px-6 py-3 rounded-lg 
-  shadow-xl text-sm font-medium animate-bounce"
-        >
-          {toast}
-        </div>
-      )}
     </div>
   );
 }
