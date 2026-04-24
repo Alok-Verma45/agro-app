@@ -1,9 +1,9 @@
 package com.alok.agroapp.controller;
 
 import com.alok.agroapp.dto.OrderResponse;
+import com.alok.agroapp.dto.PlaceOrderRequest;
 import com.alok.agroapp.entity.enums.OrderStatus;
 import com.alok.agroapp.service.OrderService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +22,11 @@ public class OrderController {
 
     // 🔥 Place Order API
     @PostMapping("/place")
-    public ResponseEntity<Map<String, String>> placeOrder() {
-
-        orderService.placeOrder();
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED) // 201
-                .body(Map.of("message", "Order placed successfully"));
+    public ResponseEntity<?> placeOrder(
+            @RequestBody PlaceOrderRequest request
+    ) {
+        orderService.placeOrder(request);
+        return ResponseEntity.ok("Order placed");
     }
 
     // 🔥 USER → My Orders

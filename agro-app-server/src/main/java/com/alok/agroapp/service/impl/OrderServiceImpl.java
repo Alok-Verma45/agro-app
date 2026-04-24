@@ -2,6 +2,7 @@ package com.alok.agroapp.service.impl;
 
 import com.alok.agroapp.dto.OrderItemResponse;
 import com.alok.agroapp.dto.OrderResponse;
+import com.alok.agroapp.dto.PlaceOrderRequest;
 import com.alok.agroapp.entity.*;
 import com.alok.agroapp.entity.enums.OrderStatus;
 import com.alok.agroapp.repository.CartRepository;
@@ -32,11 +33,16 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
     }
 
+    // ==========================================
+    // PLACE ORDER
+    // ==========================================
     @Override
     @Transactional
-    public void placeOrder() {
+    public void placeOrder(PlaceOrderRequest request) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -48,26 +54,35 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        // 🔥 Validate stock
+        // Stock Check
         for (CartItem item : cart.getItems()) {
             Product product = item.getProduct();
 
             if (product.getQuantity() < item.getQuantity()) {
                 throw new RuntimeException(
-                        "Insufficient stock for product: " + product.getName()
+                        "Insufficient stock for " + product.getName()
                 );
             }
         }
 
-        // 🔥 Create Order
+        // Create Order
         Order order = Order.builder()
                 .user(user)
                 .totalAmount(cart.getTotalAmount())
                 .createdAt(LocalDateTime.now())
                 .status(OrderStatus.PLACED)
+
+                // Delivery Details
+                .fullName(request.getFullName())
+                .phone(request.getPhone())
+                .pincode(request.getPincode())
+                .city(request.getCity())
+                .state(request.getState())
+                .addressLine(request.getAddressLine())
+
                 .build();
 
-        // 🔥 Create OrderItems
+        // Order Items
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cart.getItems()) {
@@ -84,46 +99,60 @@ public class OrderServiceImpl implements OrderService {
 
         order.setItems(orderItems);
 
-        // 🔥 Reduce stock
+        // Reduce Stock
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
-            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+
+            product.setQuantity(
+                    product.getQuantity() - cartItem.getQuantity()
+            );
         }
 
-        // 🔥 Save order
         orderRepository.save(order);
 
-        // 🔥 Clear cart
+        // Clear Cart
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
         cartRepository.save(cart);
     }
 
-    // 🔥 USER → get own orders (DTO)
+    // ==========================================
+    // USER ORDERS
+    // ==========================================
     @Override
     public List<OrderResponse> getMyOrders() {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Order> orders = orderRepository.findByUser(user);
-
-        return mapOrdersToResponse(orders);
+        return mapOrdersToResponse(
+                orderRepository.findByUser(user)
+        );
     }
 
-    // 🔥 ADMIN → get all orders (DTO)
+    // ==========================================
+    // ADMIN ORDERS
+    // ==========================================
     @Override
     public List<OrderResponse> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        return mapOrdersToResponse(orders);
+        return mapOrdersToResponse(
+                orderRepository.findAll()
+        );
     }
 
+    // ==========================================
+    // ORDER BY ID
+    // ==========================================
     @Override
     public OrderResponse getOrderById(Long id) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -131,75 +160,69 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // 🔥 SECURITY CHECK
-        boolean isOwner = order.getUser().getId().equals(user.getId());
-        boolean isAdmin = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isOwner =
+                order.getUser().getId().equals(user.getId());
+
+        boolean isAdmin =
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getAuthorities()
+                        .stream()
+                        .anyMatch(a ->
+                                a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!isOwner && !isAdmin) {
-            throw new RuntimeException("You are not authorized to view this order");
+            throw new RuntimeException("Unauthorized");
         }
 
-        // 🔥 Map to DTO
-        List<OrderItemResponse> items = order.getItems().stream()
-                .map(item -> OrderItemResponse.builder()
-                        .productName(item.getProduct().getName())
-                        .quantity(item.getQuantity())
-                        .price(item.getPrice())
-                        .build())
-                .toList();
-
-        return OrderResponse.builder()
-                .id(order.getId())
-                .totalAmount(order.getTotalAmount())
-                .createdAt(order.getCreatedAt())
-                .status(order.getStatus().name())
-                .items(items)
-                .build();
+        return mapSingleOrder(order);
     }
 
+    // ==========================================
+    // UPDATE STATUS
+    // ==========================================
     @Override
     @Transactional
-    public void updateOrderStatus(Long id, OrderStatus newStatus) {
+    public void updateOrderStatus(Long id,
+                                  OrderStatus newStatus) {
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         OrderStatus currentStatus = order.getStatus();
 
-        // 🔥 VALIDATION (existing)
         switch (currentStatus) {
 
             case PLACED:
-                if (newStatus != OrderStatus.CONFIRMED && newStatus != OrderStatus.CANCELLED) {
-                    throw new RuntimeException("Invalid status transition from PLACED");
+                if (newStatus != OrderStatus.CONFIRMED &&
+                        newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException("Invalid transition");
                 }
                 break;
 
             case CONFIRMED:
-                if (newStatus != OrderStatus.SHIPPED && newStatus != OrderStatus.CANCELLED) {
-                    throw new RuntimeException("Invalid status transition from CONFIRMED");
+                if (newStatus != OrderStatus.SHIPPED &&
+                        newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException("Invalid transition");
                 }
                 break;
 
             case SHIPPED:
                 if (newStatus != OrderStatus.DELIVERED) {
-                    throw new RuntimeException("Invalid status transition from SHIPPED");
+                    throw new RuntimeException("Invalid transition");
                 }
                 break;
 
             case DELIVERED:
             case CANCELLED:
-                throw new RuntimeException("Order already completed. No further changes allowed");
+                throw new RuntimeException("Completed order");
         }
 
-        // 🔥 ⭐ IMPORTANT LOGIC (ADD THIS)
+        // Restock on Cancel
         if (newStatus == OrderStatus.CANCELLED) {
 
             for (OrderItem item : order.getItems()) {
+
                 Product product = item.getProduct();
 
                 product.setQuantity(
@@ -211,27 +234,56 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(newStatus);
     }
 
-    // 🔥 COMMON MAPPER (CLEAN CODE 🔥)
-    private List<OrderResponse> mapOrdersToResponse(List<Order> orders) {
+    // ==========================================
+    // COMMON LIST MAPPER
+    // ==========================================
+    private List<OrderResponse> mapOrdersToResponse(
+            List<Order> orders
+    ) {
+        return orders.stream()
+                .map(this::mapSingleOrder)
+                .toList();
+    }
 
-        return orders.stream().map(order -> {
+    // ==========================================
+    // SINGLE ORDER MAPPER
+    // ==========================================
+    private OrderResponse mapSingleOrder(Order order) {
 
-            List<OrderItemResponse> items = order.getItems().stream()
-                    .map(item -> OrderItemResponse.builder()
-                            .productName(item.getProduct().getName())
-                            .quantity(item.getQuantity())
-                            .price(item.getPrice())
-                            .build())
-                    .toList();
+        List<OrderItemResponse> items =
+                order.getItems().stream()
+                        .map(item -> OrderItemResponse.builder()
+                                .productName(item.getProduct().getName())
+                                .quantity(item.getQuantity())
+                                .price(item.getPrice())
+                                .build())
+                        .toList();
 
-            return OrderResponse.builder()
-                    .id(order.getId())
-                    .totalAmount(order.getTotalAmount())
-                    .createdAt(order.getCreatedAt())
-                    .status(order.getStatus().name())
-                    .items(items)
-                    .build();
+        return OrderResponse.builder()
+                .id(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .createdAt(order.getCreatedAt())
+                .status(order.getStatus().name())
 
-        }).toList();
+                // Customer
+                .userName(order.getUser().getName())
+                .email(order.getUser().getEmail())
+
+                // 🔥 FIXED PHONE
+                .phone(
+                        order.getPhone() != null
+                                ? order.getPhone()
+                                : order.getUser().getPhone()
+                )
+
+                // Delivery
+                .fullName(order.getFullName())
+                .pincode(order.getPincode())
+                .city(order.getCity())
+                .state(order.getState())
+                .addressLine(order.getAddressLine())
+
+                .items(items)
+                .build();
     }
 }

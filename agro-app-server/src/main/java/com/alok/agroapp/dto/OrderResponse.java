@@ -21,5 +21,18 @@ public class OrderResponse {
 
     private String status;
 
+    // Customer Details
+    private String userName;
+    private String email;
+    private String phone;
+
+    // Delivery Details
+    private String fullName;
+    private String pincode;
+    private String city;
+    private String state;
+    private String addressLine;
+
+    // Items
     private List<OrderItemResponse> items;
 }

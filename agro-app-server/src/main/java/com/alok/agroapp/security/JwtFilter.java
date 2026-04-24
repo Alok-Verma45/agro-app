@@ -3,7 +3,8 @@ package com.alok.agroapp.security;
 import com.alok.agroapp.entity.User;
 import com.alok.agroapp.repository.UserRepository;
 import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,42 +19,98 @@ public class JwtFilter implements Filter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
-    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository) {
+    public JwtFilter(JwtUtil jwtUtil,
+                     UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilter(ServletRequest request,
+                         ServletResponse response,
+                         FilterChain chain)
             throws IOException, ServletException {
 
-        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletRequest req =
+                (HttpServletRequest) request;
 
-        String authHeader = req.getHeader("Authorization");
+        HttpServletResponse res =
+                (HttpServletResponse) response;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        String authHeader =
+                req.getHeader("Authorization");
 
-            String token = authHeader.substring(7);
+        if (authHeader != null &&
+                authHeader.startsWith("Bearer ")) {
+
+            String token =
+                    authHeader.substring(7);
 
             try {
-                String email = jwtUtil.extractEmail(token);
 
-                // 🔥 DB se user fetch karo
-                User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("User not found"));
+                String email =
+                        jwtUtil.extractEmail(token);
 
-                // 🔥 Dynamic role set
+                User user =
+                        userRepository.findByEmail(email)
+                                .orElseThrow(() ->
+                                        new RuntimeException(
+                                                "User not found"
+                                        ));
+
+                // =====================================
+                // BLOCKED USER STOP
+                // =====================================
+                if (user.isBlocked()) {
+
+                    res.setStatus(
+                            HttpServletResponse.SC_FORBIDDEN
+                    );
+
+                    res.setContentType(
+                            "application/json"
+                    );
+
+                    res.getWriter().write(
+                            "{\"message\":\"Your account has been blocked by admin\"}"
+                    );
+
+                    return;
+                }
+
+                // =====================================
+                // AUTHENTICATION
+                // =====================================
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                                List.of(
+                                        new SimpleGrantedAuthority(
+                                                "ROLE_" +
+                                                        user.getRole().name()
+                                        )
+                                )
                         );
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
 
-            } catch (Exception e) {
-                throw new RuntimeException("Invalid JWT token");
+            } catch (RuntimeException e) {
+
+                res.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED
+                );
+
+                res.setContentType(
+                        "application/json"
+                );
+
+                res.getWriter().write(
+                        "{\"message\":\"Invalid JWT token\"}"
+                );
+
+                return;
             }
         }
 

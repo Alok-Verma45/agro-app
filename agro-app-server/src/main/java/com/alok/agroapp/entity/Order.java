@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name= "orders")
+@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +21,6 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔥 Order belongs to user
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -32,6 +31,14 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    // 🔥 Delivery Details
+    private String fullName;
+    private String phone;
+    private String pincode;
+    private String city;
+    private String state;
+    private String addressLine;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
