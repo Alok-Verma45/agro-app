@@ -25,9 +25,11 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
 
-    public OrderServiceImpl(UserRepository userRepository,
-                            CartRepository cartRepository,
-                            OrderRepository orderRepository) {
+    public OrderServiceImpl(
+            UserRepository userRepository,
+            CartRepository cartRepository,
+            OrderRepository orderRepository
+    ) {
         this.userRepository = userRepository;
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
@@ -40,22 +42,26 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void placeOrder(PlaceOrderRequest request) {
 
-        String email = SecurityContextHolder.getContext()
+        String email = SecurityContextHolder
+                .getContext()
                 .getAuthentication()
                 .getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Cart not found"));
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        // Stock Check
+        // STOCK CHECK
         for (CartItem item : cart.getItems()) {
+
             Product product = item.getProduct();
 
             if (product.getQuantity() < item.getQuantity()) {
@@ -65,14 +71,19 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // Create Order
+        // PAYMENT
+        String paymentMethod =
+                request.getPaymentMethod() == null
+                        ? "COD"
+                        : request.getPaymentMethod();
+
+        // ALWAYS PENDING FIRST
         Order order = Order.builder()
                 .user(user)
                 .totalAmount(cart.getTotalAmount())
-                .createdAt(LocalDateTime.now())
                 .status(OrderStatus.PLACED)
 
-                // Delivery Details
+                // DELIVERY
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .pincode(request.getPincode())
@@ -80,9 +91,15 @@ public class OrderServiceImpl implements OrderService {
                 .state(request.getState())
                 .addressLine(request.getAddressLine())
 
+                // PAYMENT
+                .paymentMethod(paymentMethod)
+                .paymentStatus("PENDING")
+                .transactionId(request.getTransactionId())
+                .paidAt(null)
+
                 .build();
 
-        // Order Items
+        // ITEMS
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cart.getItems()) {
@@ -99,20 +116,23 @@ public class OrderServiceImpl implements OrderService {
 
         order.setItems(orderItems);
 
-        // Reduce Stock
+        // REDUCE STOCK
         for (CartItem cartItem : cart.getItems()) {
+
             Product product = cartItem.getProduct();
 
             product.setQuantity(
-                    product.getQuantity() - cartItem.getQuantity()
+                    product.getQuantity()
+                            - cartItem.getQuantity()
             );
         }
 
         orderRepository.save(order);
 
-        // Clear Cart
+        // CLEAR CART
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
+
         cartRepository.save(cart);
     }
 
@@ -122,12 +142,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponse> getMyOrders() {
 
-        String email = SecurityContextHolder.getContext()
+        String email = SecurityContextHolder
+                .getContext()
                 .getAuthentication()
                 .getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
         return mapOrdersToResponse(
                 orderRepository.findByUser(user)
@@ -150,26 +172,33 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getOrderById(Long id) {
 
-        String email = SecurityContextHolder.getContext()
+        String email = SecurityContextHolder
+                .getContext()
                 .getAuthentication()
                 .getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
 
         boolean isOwner =
-                order.getUser().getId().equals(user.getId());
+                order.getUser()
+                        .getId()
+                        .equals(user.getId());
 
         boolean isAdmin =
-                SecurityContextHolder.getContext()
+                SecurityContextHolder
+                        .getContext()
                         .getAuthentication()
                         .getAuthorities()
                         .stream()
                         .anyMatch(a ->
-                                a.getAuthority().equals("ROLE_ADMIN"));
+                                a.getAuthority()
+                                        .equals("ROLE_ADMIN"));
 
         if (!isOwner && !isAdmin) {
             throw new RuntimeException("Unauthorized");
@@ -179,15 +208,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ==========================================
-    // UPDATE STATUS
+    // ADMIN UPDATE ORDER STATUS
     // ==========================================
     @Override
     @Transactional
-    public void updateOrderStatus(Long id,
-                                  OrderStatus newStatus) {
+    public void updateOrderStatus(
+            Long id,
+            OrderStatus newStatus
+    ) {
 
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
 
         OrderStatus currentStatus = order.getStatus();
 
@@ -218,7 +250,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new RuntimeException("Completed order");
         }
 
-        // Restock on Cancel
+        // CANCELLED
         if (newStatus == OrderStatus.CANCELLED) {
 
             for (OrderItem item : order.getItems()) {
@@ -226,8 +258,33 @@ public class OrderServiceImpl implements OrderService {
                 Product product = item.getProduct();
 
                 product.setQuantity(
-                        product.getQuantity() + item.getQuantity()
+                        product.getQuantity()
+                                + item.getQuantity()
                 );
+            }
+
+            if ("PAID".equalsIgnoreCase(order.getPaymentStatus())) {
+                order.setPaymentStatus("REFUNDED");
+            } else {
+                order.setPaymentStatus("CANCELLED");
+            }
+        }
+
+        // DELIVERED
+        if (newStatus == OrderStatus.DELIVERED) {
+
+            order.setDeliveredAt(LocalDateTime.now());
+
+            // COD can be marked paid on delivery
+            if ("COD".equalsIgnoreCase(order.getPaymentMethod())
+                    && "PENDING".equalsIgnoreCase(order.getPaymentStatus())) {
+
+                order.setPaymentStatus("PAID");
+                order.setPaidAt(LocalDateTime.now());
+
+                if (order.getTransactionId() == null) {
+                    order.setTransactionId("COD-" + order.getId());
+                }
             }
         }
 
@@ -235,7 +292,108 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ==========================================
-    // COMMON LIST MAPPER
+    // USER CANCEL ORDER
+    // ==========================================
+    @Override
+    @Transactional
+    public void cancelMyOrder(Long id) {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (order.getStatus() != OrderStatus.PLACED &&
+                order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new RuntimeException(
+                    "Order cannot be cancelled now"
+            );
+        }
+
+        // RESTOCK
+        for (OrderItem item : order.getItems()) {
+
+            Product product = item.getProduct();
+
+            product.setQuantity(
+                    product.getQuantity()
+                            + item.getQuantity()
+            );
+        }
+
+        if ("PAID".equalsIgnoreCase(order.getPaymentStatus())) {
+            order.setPaymentStatus("REFUNDED");
+        } else {
+            order.setPaymentStatus("CANCELLED");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+    }
+
+    // ==========================================
+    // VERIFY PAYMENT
+    // ==========================================
+    @Override
+    @Transactional
+    public void verifyPayment(Long id) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
+
+        if ("PAID".equalsIgnoreCase(order.getPaymentStatus())) {
+            throw new RuntimeException("Already paid");
+        }
+
+        if ("FAILED".equalsIgnoreCase(order.getPaymentStatus())) {
+            throw new RuntimeException("Rejected payment cannot verify");
+        }
+
+        order.setPaymentStatus("PAID");
+        order.setPaidAt(LocalDateTime.now());
+
+        if (order.getTransactionId() == null ||
+                order.getTransactionId().isBlank()) {
+
+            order.setTransactionId(
+                    order.getPaymentMethod() + "-" + order.getId()
+            );
+        }
+    }
+
+    // ==========================================
+    // REJECT PAYMENT
+    // ==========================================
+    @Override
+    @Transactional
+    public void rejectPayment(Long id) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
+
+        if ("PAID".equalsIgnoreCase(order.getPaymentStatus())) {
+            throw new RuntimeException("Paid payment cannot reject");
+        }
+
+        order.setPaymentStatus("FAILED");
+        order.setPaidAt(null);
+    }
+
+    // ==========================================
+    // COMMON MAPPER
     // ==========================================
     private List<OrderResponse> mapOrdersToResponse(
             List<Order> orders
@@ -246,17 +404,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ==========================================
-    // SINGLE ORDER MAPPER
+    // SINGLE MAPPER
     // ==========================================
     private OrderResponse mapSingleOrder(Order order) {
 
         List<OrderItemResponse> items =
-                order.getItems().stream()
-                        .map(item -> OrderItemResponse.builder()
-                                .productName(item.getProduct().getName())
-                                .quantity(item.getQuantity())
-                                .price(item.getPrice())
-                                .build())
+                order.getItems()
+                        .stream()
+                        .map(item ->
+                                OrderItemResponse.builder()
+                                        .productName(
+                                                item.getProduct().getName()
+                                        )
+                                        .quantity(item.getQuantity())
+                                        .price(item.getPrice())
+                                        .build()
+                        )
                         .toList();
 
         return OrderResponse.builder()
@@ -265,23 +428,29 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getCreatedAt())
                 .status(order.getStatus().name())
 
-                // Customer
+                // CUSTOMER
                 .userName(order.getUser().getName())
                 .email(order.getUser().getEmail())
 
-                // 🔥 FIXED PHONE
                 .phone(
                         order.getPhone() != null
                                 ? order.getPhone()
                                 : order.getUser().getPhone()
                 )
 
-                // Delivery
+                // DELIVERY
                 .fullName(order.getFullName())
                 .pincode(order.getPincode())
                 .city(order.getCity())
                 .state(order.getState())
                 .addressLine(order.getAddressLine())
+
+                // PAYMENT
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .transactionId(order.getTransactionId())
+                .paidAt(order.getPaidAt())
+                .deliveredAt(order.getDeliveredAt())
 
                 .items(items)
                 .build();

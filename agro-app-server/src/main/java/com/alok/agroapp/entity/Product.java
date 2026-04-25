@@ -2,6 +2,7 @@ package com.alok.agroapp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -28,6 +29,12 @@ public class Product {
     private Integer quantity;
 
     private String description;
+
+    // ✅ NEW FIELD
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    private String category;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

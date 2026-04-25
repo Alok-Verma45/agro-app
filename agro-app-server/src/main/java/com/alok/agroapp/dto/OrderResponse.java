@@ -1,6 +1,8 @@
 package com.alok.agroapp.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,8 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class OrderResponse {
 
@@ -21,17 +21,24 @@ public class OrderResponse {
 
     private String status;
 
-    // Customer Details
+    // Customer
     private String userName;
     private String email;
     private String phone;
 
-    // Delivery Details
+    // Delivery
     private String fullName;
     private String pincode;
     private String city;
     private String state;
     private String addressLine;
+
+    // Payment
+    private String paymentMethod;
+    private String paymentStatus;
+    private String transactionId;
+    private LocalDateTime paidAt;
+    private LocalDateTime deliveredAt;
 
     // Items
     private List<OrderItemResponse> items;

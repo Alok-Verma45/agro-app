@@ -96,12 +96,17 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // ===============================
                         // PUBLIC
+                        // ===============================
                         .requestMatchers(
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/products/**"   // ✅ static product images
                         ).permitAll()
 
+                        // ===============================
                         // HOME
+                        // ===============================
                         .requestMatchers(
                                 "/api/home/**"
                         ).hasAnyRole(
@@ -109,7 +114,9 @@ public class SecurityConfig {
                                 "ADMIN"
                         )
 
+                        // ===============================
                         // PRODUCTS VIEW
+                        // ===============================
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/products/**"
@@ -118,7 +125,9 @@ public class SecurityConfig {
                                 "ADMIN"
                         )
 
+                        // ===============================
                         // PRODUCTS ADMIN ONLY
+                        // ===============================
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/products/**"
@@ -139,7 +148,9 @@ public class SecurityConfig {
                                 "/api/products/**"
                         ).hasRole("ADMIN")
 
+                        // ===============================
                         // USER ORDERS
+                        // ===============================
                         .requestMatchers(
                                 "/api/orders/place"
                         ).hasRole("USER")
@@ -148,7 +159,14 @@ public class SecurityConfig {
                                 "/api/orders/my"
                         ).hasRole("USER")
 
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/orders/*/cancel"
+                        ).hasRole("USER")
+
+                        // ===============================
                         // ADMIN
+                        // ===============================
                         .requestMatchers(
                                 "/api/orders/all"
                         ).hasRole("ADMIN")
@@ -173,6 +191,9 @@ public class SecurityConfig {
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
 
+                        // ===============================
+                        // OTHERS
+                        // ===============================
                         .anyRequest()
                         .authenticated()
                 )

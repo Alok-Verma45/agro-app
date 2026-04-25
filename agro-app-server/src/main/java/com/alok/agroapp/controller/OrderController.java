@@ -20,47 +20,108 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // 🔥 Place Order API
+    // =====================================
+    // PLACE ORDER
+    // =====================================
     @PostMapping("/place")
     public ResponseEntity<?> placeOrder(
             @RequestBody PlaceOrderRequest request
     ) {
         orderService.placeOrder(request);
-        return ResponseEntity.ok("Order placed");
+
+        return ResponseEntity.ok(
+                Map.of("message", "Order placed")
+        );
     }
 
-    // 🔥 USER → My Orders
+    // =====================================
+    // USER ORDERS
+    // =====================================
     @GetMapping("/my")
     public ResponseEntity<List<OrderResponse>> getMyOrders() {
 
-        List<OrderResponse> orders = orderService.getMyOrders();
-
-        return ResponseEntity.ok(orders); // 200
+        return ResponseEntity.ok(
+                orderService.getMyOrders()
+        );
     }
 
-    // 🔥 ADMIN → All Orders
+    // =====================================
+    // ADMIN ALL ORDERS
+    // =====================================
     @GetMapping("/all")
     public ResponseEntity<List<OrderResponse>> getAllOrders() {
 
-        List<OrderResponse> orders = orderService.getAllOrders();
-
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(
+                orderService.getAllOrders()
+        );
     }
 
-    // 🔥 Order Details
+    // =====================================
+    // ORDER DETAILS
+    // =====================================
     @GetMapping("/{id:\\d+}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-
-        OrderResponse order = orderService.getOrderById(id);
-
-        return ResponseEntity.ok(order);
+    public ResponseEntity<OrderResponse> getOrderById(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                orderService.getOrderById(id)
+        );
     }
+
+    // =====================================
+    // ADMIN UPDATE ORDER STATUS
+    // =====================================
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
-            @RequestParam OrderStatus status) {
-
+            @RequestParam OrderStatus status
+    ) {
         orderService.updateOrderStatus(id, status);
-        return ResponseEntity.ok(Map.of("message", "Status updated"));
+
+        return ResponseEntity.ok(
+                Map.of("message", "Order status updated")
+        );
+    }
+
+    // =====================================
+    // USER CANCEL ORDER
+    // =====================================
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelMyOrder(
+            @PathVariable Long id
+    ) {
+        orderService.cancelMyOrder(id);
+
+        return ResponseEntity.ok(
+                Map.of("message", "Order cancelled")
+        );
+    }
+
+    // =====================================
+    // ADMIN VERIFY PAYMENT
+    // =====================================
+    @PutMapping("/{id}/payment/verify")
+    public ResponseEntity<?> verifyPayment(
+            @PathVariable Long id
+    ) {
+        orderService.verifyPayment(id);
+
+        return ResponseEntity.ok(
+                Map.of("message", "Payment verified")
+        );
+    }
+
+    // =====================================
+    // ADMIN REJECT PAYMENT
+    // =====================================
+    @PutMapping("/{id}/payment/reject")
+    public ResponseEntity<?> rejectPayment(
+            @PathVariable Long id
+    ) {
+        orderService.rejectPayment(id);
+
+        return ResponseEntity.ok(
+                Map.of("message", "Payment rejected")
+        );
     }
 }
