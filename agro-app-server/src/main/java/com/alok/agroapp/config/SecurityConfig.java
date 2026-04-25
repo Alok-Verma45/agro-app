@@ -3,12 +3,13 @@ package com.alok.agroapp.config;
 import com.alok.agroapp.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
@@ -29,65 +30,161 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 🔥 CORS CONFIG
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        CorsConfiguration config =
+                new CorsConfiguration();
+
+        config.setAllowedOrigins(
+                List.of(
+                        "http://localhost:5173"
+                )
+        );
+
+        config.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
+        );
+
+        config.setAllowedHeaders(
+                List.of("*")
+        );
+
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/**",
+                config
+        );
 
         return source;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(
+                        AbstractHttpConfigurer::disable
+                )
 
-                // 🔥 Enable CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
 
-                // 🔥 Disable default login
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(
+                        AbstractHttpConfigurer::disable
+                )
+
+                .httpBasic(
+                        AbstractHttpConfigurer::disable
+                )
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 Public APIs
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // PUBLIC
+                        .requestMatchers(
+                                "/api/auth/**"
+                        ).permitAll()
 
-                        // 👤 USER + ADMIN common
-                        .requestMatchers("/api/home/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/products/**").hasAnyRole("USER", "ADMIN")
+                        // HOME
+                        .requestMatchers(
+                                "/api/home/**"
+                        ).hasAnyRole(
+                                "USER",
+                                "ADMIN"
+                        )
 
-                        // 🟢 USER only
-                        .requestMatchers("/api/orders/place").hasRole("USER")
-                        .requestMatchers("/api/orders/my").hasRole("USER")
+                        // PRODUCTS VIEW
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/products/**"
+                        ).hasAnyRole(
+                                "USER",
+                                "ADMIN"
+                        )
 
-                        // 🔴 ADMIN only
-                        .requestMatchers("/api/orders/all").hasRole("ADMIN")
-                        .requestMatchers("/api/orders/*/status").hasRole("ADMIN")
-                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
-                        .requestMatchers("/api/credits/**").hasRole("ADMIN")
-                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // PRODUCTS ADMIN ONLY
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/products/**"
+                        ).hasRole("ADMIN")
 
-                        .anyRequest().authenticated()
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/products/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/products/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/products/**"
+                        ).hasRole("ADMIN")
+
+                        // USER ORDERS
+                        .requestMatchers(
+                                "/api/orders/place"
+                        ).hasRole("USER")
+
+                        .requestMatchers(
+                                "/api/orders/my"
+                        ).hasRole("USER")
+
+                        // ADMIN
+                        .requestMatchers(
+                                "/api/orders/all"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/orders/*/status"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/customers/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/credits/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/dashboard/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/admin/**"
+                        ).hasRole("ADMIN")
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
 
-    // 🔥 Disable default in-memory users
     @Bean
     public UserDetailsService userDetailsService() {
         return new InMemoryUserDetailsManager();

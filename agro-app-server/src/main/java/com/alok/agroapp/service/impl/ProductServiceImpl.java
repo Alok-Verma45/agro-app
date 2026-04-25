@@ -52,4 +52,16 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.delete(existing);
     }
+
+    @Override
+    public Product updateStock(Long id, Integer quantity) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Product not found"));
+
+        product.setQuantity(quantity);
+
+        return productRepository.save(product);
+    }
 }
