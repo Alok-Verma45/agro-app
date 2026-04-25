@@ -8,24 +8,34 @@ import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
 import Checkout from "../pages/Checkout";
 import PaymentSuccess from "../pages/PaymentSuccess";
-import Dashboard from "../pages/Dashboard";
+
+import OfflineDashboard from "../pages/OfflineDashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
 import Credits from "../pages/Credits";
 import BillingPage from "../pages/BillingPage";
-import AdminUsers from '../pages/AdminUsers';
+
+import AdminUsers from "../pages/AdminUsers";
+import AdminUserProfile from "../pages/AdminUserProfile";
+import AdminOrders from "../pages/AdminOrders";
+import OnlineDashboard from "../pages/OnlineDashboard";
+import Inventory from "../pages/Inventory";
+import Reports from "../pages/Reports";
+import Settings from "../pages/Settings";
+
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
-import AdminOrders from "../pages/AdminOrders";
 
-// 🔥 ADMIN PROTECTED
+// ================================
+// ADMIN PROTECTED ROUTE
+// ================================
 const AdminRoute = ({ children }) => {
   const role = localStorage.getItem("role");
 
   if (!role || role !== "ADMIN") {
-    return <Navigate to="/home" />;
+    return <Navigate to="/home" replace />;
   }
 
   return children;
@@ -34,7 +44,8 @@ const AdminRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
+      {/* DEFAULT */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* AUTH */}
       <Route path="/login" element={<Login />} />
@@ -42,23 +53,50 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* APP */}
+      {/* MAIN LAYOUT */}
       <Route element={<MainLayout />}>
-        {/* USER */}
+
+        {/* ================= USER ROUTES ================= */}
         <Route path="/home" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route
+          path="/payment-success"
+          element={<PaymentSuccess />}
+        />
 
-        {/* ADMIN */}
+        {/* ================= ADMIN OFFLINE ================= */}
         <Route
           path="/dashboard"
           element={
             <AdminRoute>
-              <Dashboard />
+              <OfflineDashboard />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/offline-dashboard"
+          element={<Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/customers"
+          element={
+            <AdminRoute>
+              <Customers />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/billing"
+          element={
+            <AdminRoute>
+              <BillingPage />
             </AdminRoute>
           }
         />
@@ -68,6 +106,16 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <Credits />
+            </AdminRoute>
+          }
+        />
+
+        {/* ================= ADMIN ONLINE ================= */}
+        <Route
+          path="/admin/online-dashboard"
+          element={
+            <AdminRoute>
+              <OnlineDashboard />
             </AdminRoute>
           }
         />
@@ -82,20 +130,19 @@ function AppRoutes() {
         />
 
         <Route
-          path="/customers"
+          path="/admin/users"
           element={
             <AdminRoute>
-              <Customers />
+              <AdminUsers />
             </AdminRoute>
           }
         />
 
-        {/* 🔥 NEW BILLING ROUTE */}
-        <Route
-          path="/billing"
+         <Route
+          path="/admin/users/:id"
           element={
             <AdminRoute>
-              <BillingPage />
+              <AdminUserProfile />
             </AdminRoute>
           }
         />
@@ -108,15 +155,40 @@ function AppRoutes() {
             </AdminRoute>
           }
         />
+
+        {/* ================= INVENTORY ================= */}
         <Route
-          path="/admin/users"
+          path="/inventory"
           element={
             <AdminRoute>
-              <AdminUsers />
+              <Inventory />
+            </AdminRoute>
+          }
+        />
+
+        {/* ================= REPORTS ================= */}
+        <Route
+          path="/reports"
+          element={
+            <AdminRoute>
+              <Reports />
+            </AdminRoute>
+          }
+        />
+
+        {/* ================= SETTINGS ================= */}
+        <Route
+          path="/settings"
+          element={
+            <AdminRoute>
+              <Settings />
             </AdminRoute>
           }
         />
       </Route>
+
+      {/* 404 FALLBACK */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function AdminUsers() {
+
+  const navigate = useNavigate();
+  
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -326,7 +330,7 @@ function AdminUsers() {
               <div className="flex flex-wrap gap-2 lg:justify-end">
                 <button
                   onClick={() =>
-                    openProfile(user.id)
+                    navigate(`/admin/users/${user.id}`)
                   }
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700"
                 >
