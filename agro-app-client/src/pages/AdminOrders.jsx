@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function AdminOrders() {
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token");
 
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [orders, setOrders] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [search, setSearch] =
+    useState("");
 
   const [selectedOrder, setSelectedOrder] =
     useState(null);
@@ -21,29 +27,37 @@ function AdminOrders() {
   // ===============================
   // FETCH ORDERS
   // ===============================
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:8080/api/orders/all",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const fetchOrders =
+    async () => {
+      try {
+        const res =
+          await axios.get(
+            "http://localhost:8080/api/orders/all",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-      setOrders(res.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setOrders(
+          res.data || []
+        );
+      } catch (err) {
+        console.error(
+          err
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // ===============================
-  // STATUS FLOW
+  // ORDER FLOW
   // ===============================
-  const getNextStatuses = (status) => {
+  const getNextStatuses = (
+    status
+  ) => {
     switch (status) {
       case "PLACED":
         return [
@@ -58,7 +72,9 @@ function AdminOrders() {
         ];
 
       case "SHIPPED":
-        return ["DELIVERED"];
+        return [
+          "DELIVERED",
+        ];
 
       default:
         return [];
@@ -68,69 +84,162 @@ function AdminOrders() {
   // ===============================
   // UPDATE STATUS
   // ===============================
-  const updateStatus = async (
-    orderId,
-    status
-  ) => {
-    try {
-      setUpdatingId(orderId);
+  const updateStatus =
+    async (
+      orderId,
+      status
+    ) => {
+      try {
+        setUpdatingId(
+          orderId
+        );
 
-      await axios.put(
-        `http://localhost:8080/api/orders/${orderId}/status`,
-        null,
-        {
-          params: { status },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? {
-                ...o,
-                status,
-              }
-            : o
-        )
-      );
-
-      setSelectedOrder((prev) =>
-        prev &&
-        prev.id === orderId
-          ? {
-              ...prev,
+        await axios.put(
+          `http://localhost:8080/api/orders/${orderId}/status`,
+          null,
+          {
+            params: {
               status,
-            }
-          : prev
-      );
-    } catch (err) {
-      console.error(
-        "Status update failed",
-        err
-      );
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  // ===============================
-  // FORMAT DATE
-  // ===============================
-  const formatDate = (date) =>
-    new Date(date).toLocaleString(
-      "en-IN",
-      {
-        dateStyle: "medium",
-        timeStyle: "short",
+        await refreshData(
+          orderId
+        );
+      } catch (err) {
+        console.error(
+          err
+        );
+        alert(
+          "Status update failed"
+        );
+      } finally {
+        setUpdatingId(
+          null
+        );
       }
-    );
+    };
 
   // ===============================
-  // STATUS COLORS
+  // VERIFY PAYMENT
   // ===============================
+  const verifyPayment =
+    async (
+      orderId
+    ) => {
+      try {
+        setUpdatingId(
+          orderId
+        );
+
+        await axios.put(
+          `http://localhost:8080/api/orders/${orderId}/payment/verify`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        await refreshData(
+          orderId
+        );
+      } catch (err) {
+        console.error(
+          err
+        );
+        alert(
+          "Payment verify failed"
+        );
+      } finally {
+        setUpdatingId(
+          null
+        );
+      }
+    };
+
+  // ===============================
+  // REJECT PAYMENT
+  // ===============================
+  const rejectPayment =
+    async (
+      orderId
+    ) => {
+      try {
+        setUpdatingId(
+          orderId
+        );
+
+        await axios.put(
+          `http://localhost:8080/api/orders/${orderId}/payment/reject`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        await refreshData(
+          orderId
+        );
+      } catch (err) {
+        console.error(
+          err
+        );
+        alert(
+          "Payment reject failed"
+        );
+      } finally {
+        setUpdatingId(
+          null
+        );
+      }
+    };
+
+  // ===============================
+  // REFRESH
+  // ===============================
+  const refreshData =
+    async (
+      orderId
+    ) => {
+      await fetchOrders();
+
+      const updated =
+        await axios.get(
+          `http://localhost:8080/api/orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+      setSelectedOrder(
+        updated.data
+      );
+    };
+
+  // ===============================
+  // HELPERS
+  // ===============================
+  const formatDate = (
+    date
+  ) =>
+    date
+      ? new Date(
+          date
+        ).toLocaleString(
+          "en-IN"
+        )
+      : "N/A";
+
   const getStatusClass = (
     status
   ) => {
@@ -155,27 +264,48 @@ function AdminOrders() {
     }
   };
 
+  const getPaymentClass =
+    (status) => {
+      switch (
+        status
+      ) {
+        case "PAID":
+          return "bg-green-500/20 text-green-400";
+
+        case "FAILED":
+          return "bg-red-500/20 text-red-400";
+
+        case "REFUNDED":
+          return "bg-blue-500/20 text-blue-400";
+
+        default:
+          return "bg-orange-500/20 text-orange-400";
+      }
+    };
+
   // ===============================
   // SEARCH
   // ===============================
   const filteredOrders =
-    orders.filter((order) =>
-      `${order.id} ${
-        order.userName || ""
-      } ${order.email || ""}`
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+    orders.filter(
+      (order) =>
+        `${order.id} ${
+          order.userName ||
+          ""
+        } ${
+          order.email ||
+          ""
+        }`
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
     );
 
-  // ===============================
-  // LOADING
-  // ===============================
   if (loading) {
     return (
       <div className="p-10 text-center text-gray-400">
-        Loading orders...
+        Loading...
       </div>
     );
   }
@@ -184,7 +314,7 @@ function AdminOrders() {
     <div className="py-6 space-y-6">
 
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex justify-between items-center gap-4">
 
         <div>
           <h1 className="text-3xl font-bold text-green-400">
@@ -192,14 +322,13 @@ function AdminOrders() {
           </h1>
 
           <p className="text-gray-400 mt-1">
-            Manage all customer
-            orders
+            Orders + Payment Management
           </p>
         </div>
 
         <input
           type="text"
-          placeholder="Search by ID / User..."
+          placeholder="Search..."
           value={search}
           onChange={(e) =>
             setSearch(
@@ -225,101 +354,100 @@ function AdminOrders() {
             Amount
           </div>
           <div className="col-span-2">
-            Status
+            Order
           </div>
           <div className="col-span-2">
-            Date
+            Payment
           </div>
           <div className="col-span-2">
             Action
           </div>
         </div>
 
-        {filteredOrders.length ===
-        0 ? (
-          <p className="p-5 text-gray-400">
-            No orders found
-          </p>
-        ) : (
-          filteredOrders.map(
-            (order, i) => (
-              <div
-                key={order.id}
-                className={`grid grid-cols-12 px-5 py-4 items-center border-b border-white/5 hover:bg-white/5 transition ${
-                  i % 2 === 0
-                    ? "bg-white/[0.02]"
-                    : ""
-                }`}
-              >
-                <div className="col-span-1 font-bold">
-                  #
-                  {order.id}
-                </div>
-
-                <div className="col-span-3">
-                  <p className="font-semibold">
-                    {order.userName ||
-                      "Customer"}
-                  </p>
-
-                  <p className="text-xs text-gray-400">
-                    {order.email}
-                  </p>
-                </div>
-
-                <div className="col-span-2 font-semibold text-green-400">
-                  ₹
-                  {
-                    order.totalAmount
-                  }
-                </div>
-
-                <div className="col-span-2">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(
-                      order.status
-                    )}`}
-                  >
-                    {
-                      order.status
-                    }
-                  </span>
-                </div>
-
-                <div className="col-span-2 text-sm text-gray-400">
-                  {formatDate(
-                    order.createdAt
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <button
-                    onClick={() =>
-                      setSelectedOrder(
-                        order
-                      )
-                    }
-                    className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-semibold"
-                  >
-                    View
-                  </button>
-                </div>
+        {filteredOrders.map(
+          (
+            order
+          ) => (
+            <div
+              key={
+                order.id
+              }
+              className="grid grid-cols-12 px-5 py-4 border-b border-white/5 items-center hover:bg-white/5"
+            >
+              <div className="col-span-1 font-bold">
+                #
+                {order.id}
               </div>
-            )
+
+              <div className="col-span-3">
+                <p className="font-semibold">
+                  {
+                    order.userName
+                  }
+                </p>
+
+                <p className="text-xs text-gray-400">
+                  {
+                    order.email
+                  }
+                </p>
+              </div>
+
+              <div className="col-span-2 text-green-400 font-semibold">
+                ₹
+                {
+                  order.totalAmount
+                }
+              </div>
+
+              <div className="col-span-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs ${getStatusClass(
+                    order.status
+                  )}`}
+                >
+                  {
+                    order.status
+                  }
+                </span>
+              </div>
+
+              <div className="col-span-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs ${getPaymentClass(
+                    order.paymentStatus
+                  )}`}
+                >
+                  {order.paymentStatus ||
+                    "PENDING"}
+                </span>
+              </div>
+
+              <div className="col-span-2">
+                <button
+                  onClick={() =>
+                    setSelectedOrder(
+                      order
+                    )
+                  }
+                  className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600"
+                >
+                  View
+                </button>
+              </div>
+            </div>
           )
         )}
       </div>
 
-      {/* ===========================
-          VIEW MODAL
-      =========================== */}
+      {/* MODAL */}
       {selectedOrder && (
         <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4">
 
           <div className="w-full max-w-3xl rounded-2xl bg-gray-900 border border-white/10 p-6 max-h-[90vh] overflow-y-auto">
 
             {/* TOP */}
-            <div className="flex justify-between items-start gap-4">
+            <div className="flex justify-between items-start">
 
               <div>
                 <h2 className="text-2xl font-bold text-green-400">
@@ -349,136 +477,55 @@ function AdminOrders() {
 
             </div>
 
-            {/* STATUS */}
-            <div className="mt-5">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(
-                  selectedOrder.status
-                )}`}
-              >
-                {
-                  selectedOrder.status
-                }
-              </span>
-            </div>
+            {/* PAYMENT */}
+            <div className="mt-6 bg-white/5 rounded-2xl p-5">
 
-            {/* CUSTOMER */}
-            <div className="grid md:grid-cols-2 gap-6 mt-6">
-
-              <div>
-                <h3 className="font-semibold mb-2">
-                  Customer
-                </h3>
-
-                <p>
-                  {
-                    selectedOrder.userName
-                  }
-                </p>
-
-                <p className="text-gray-400">
-                  {
-                    selectedOrder.email
-                  }
-                </p>
-
-                <p className="text-gray-400">
-                  {
-                    selectedOrder.phone
-                  }
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">
-                  Address
-                </h3>
-
-                <p>
-                  {
-                    selectedOrder.addressLine
-                  }
-                </p>
-
-                <p>
-                  {
-                    selectedOrder.city
-                  }{" "}
-                  {
-                    selectedOrder.state
-                  }
-                </p>
-
-                <p>
-                  {
-                    selectedOrder.pincode
-                  }
-                </p>
-              </div>
-
-            </div>
-
-            {/* ITEMS */}
-            <div className="mt-6">
-              <h3 className="font-semibold mb-3">
-                Ordered Items
+              <h3 className="font-semibold mb-4">
+                💳 Payment Info
               </h3>
 
-              <div className="space-y-3">
-                {selectedOrder.items?.map(
-                  (
-                    item,
-                    i
-                  ) => (
-                    <div
-                      key={i}
-                      className="flex justify-between p-3 rounded-xl bg-white/5"
-                    >
-                      <span>
-                        {
-                          item.productName
-                        }{" "}
-                        ×{" "}
-                        {
-                          item.quantity
-                        }
-                      </span>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
 
-                      <span>
-                        ₹
-                        {(
-                          Number(
-                            item.price ||
-                              item.priceAtTime
-                          ) *
-                          Number(
-                            item.quantity
-                          )
-                        )}
-                      </span>
-                    </div>
-                  )
-                )}
+                <p>
+                  Method:
+                  <span className="ml-2 font-semibold">
+                    {selectedOrder.paymentMethod}
+                  </span>
+                </p>
+
+                <p>
+                  Status:
+                  <span
+                    className={`ml-2 px-2 py-1 rounded-lg text-xs ${getPaymentClass(
+                      selectedOrder.paymentStatus
+                    )}`}
+                  >
+                    {selectedOrder.paymentStatus}
+                  </span>
+                </p>
+
+                <p>
+                  Txn ID:
+                  <span className="ml-2 font-semibold">
+                    {selectedOrder.transactionId ||
+                      "N/A"}
+                  </span>
+                </p>
+
+                <p>
+                  Paid At:
+                  <span className="ml-2 font-semibold">
+                    {formatDate(
+                      selectedOrder.paidAt
+                    )}
+                  </span>
+                </p>
+
               </div>
-            </div>
-
-            {/* TOTAL */}
-            <div className="flex justify-between pt-5 mt-5 border-t border-white/10">
-
-              <p className="font-semibold">
-                Total Amount
-              </p>
-
-              <p className="text-xl font-bold text-green-400">
-                ₹
-                {
-                  selectedOrder.totalAmount
-                }
-              </p>
 
             </div>
 
-            {/* STATUS ACTIONS */}
+            {/* ORDER ACTIONS */}
             <div className="flex flex-wrap gap-3 mt-6">
 
               {getNextStatuses(
@@ -501,17 +548,64 @@ function AdminOrders() {
                       updatingId ===
                       selectedOrder.id
                     }
-                    className="px-4 py-3 rounded-xl bg-green-500 hover:bg-green-600 font-semibold disabled:opacity-50"
+                    className="px-4 py-3 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50"
                   >
-                    {updatingId ===
-                    selectedOrder.id
-                      ? "Updating..."
-                      : status}
+                    {status}
                   </button>
                 )
               )}
 
             </div>
+
+            {/* PAYMENT ACTIONS */}
+            {selectedOrder.status !==
+              "CANCELLED" &&
+              selectedOrder.paymentStatus !==
+                "PAID" &&
+              selectedOrder.paymentStatus !==
+                "REFUNDED" && (
+                <div className="mt-5">
+
+                  <h3 className="font-semibold mb-3">
+                    Payment Actions
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+
+                    <button
+                      onClick={() =>
+                        verifyPayment(
+                          selectedOrder.id
+                        )
+                      }
+                      disabled={
+                        updatingId ===
+                        selectedOrder.id
+                      }
+                      className="px-5 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
+                    >
+                      ✅ Verify Payment
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        rejectPayment(
+                          selectedOrder.id
+                        )
+                      }
+                      disabled={
+                        updatingId ===
+                        selectedOrder.id
+                      }
+                      className="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 disabled:opacity-50"
+                    >
+                      ❌ Reject Payment
+                    </button>
+
+                  </div>
+
+                </div>
+              )}
 
           </div>
         </div>

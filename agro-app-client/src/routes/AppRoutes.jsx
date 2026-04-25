@@ -2,6 +2,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 import Home from "../pages/Home";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
+import Privacy from "../pages/Privacy";
+import Terms from "../pages/Terms";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import Orders from "../pages/Orders";
@@ -55,18 +59,18 @@ function AppRoutes() {
 
       {/* MAIN LAYOUT */}
       <Route element={<MainLayout />}>
-
         {/* ================= USER ROUTES ================= */}
         <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route
-          path="/payment-success"
-          element={<PaymentSuccess />}
-        />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         {/* ================= ADMIN OFFLINE ================= */}
         <Route
@@ -138,7 +142,7 @@ function AppRoutes() {
           }
         />
 
-         <Route
+        <Route
           path="/admin/users/:id"
           element={
             <AdminRoute>

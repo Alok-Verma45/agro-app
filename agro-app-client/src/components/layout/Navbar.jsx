@@ -12,11 +12,13 @@ function Navbar({ toggleSidebar }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // 🌙 THEME INIT
+  // =====================================
+  // THEME INIT
+  // =====================================
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
+    const savedTheme = localStorage.getItem("theme");
 
-    if (saved === "dark") {
+    if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
       setDark(true);
     } else {
@@ -25,44 +27,59 @@ function Navbar({ toggleSidebar }) {
     }
   }, []);
 
-  // 🛒 FETCH CART FROM BACKEND
+  // =====================================
+  // FETCH CART (USER ONLY)
+  // =====================================
   const fetchCart = async () => {
     try {
       const res = await getCart();
 
-      const totalQty =
-        res.data.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      const qty =
+        res.data.items?.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        ) || 0;
 
-      setCartCount(totalQty);
-    } catch (err) {
-      console.error("Cart fetch error:", err);
+      setCartCount(qty);
+    } catch (error) {
       setCartCount(0);
     }
   };
 
-  // 🔥 INITIAL LOAD
   useEffect(() => {
     if (token && role === "USER") {
       fetchCart();
     }
   }, [token, role]);
 
-  // 🔥 LISTEN CART UPDATE EVENT
   useEffect(() => {
     const handleUpdate = () => fetchCart();
 
-    window.addEventListener("cartUpdated", handleUpdate);
+    window.addEventListener(
+      "cartUpdated",
+      handleUpdate
+    );
 
-    return () => {
-      window.removeEventListener("cartUpdated", handleUpdate);
-    };
+    return () =>
+      window.removeEventListener(
+        "cartUpdated",
+        handleUpdate
+      );
   }, []);
 
+  // =====================================
+  // HELPERS
+  // =====================================
   const toggleTheme = () => {
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark =
+      document.documentElement.classList.contains(
+        "dark"
+      );
 
     if (isDark) {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove(
+        "dark"
+      );
       localStorage.setItem("theme", "light");
       setDark(false);
     } else {
@@ -72,135 +89,229 @@ function Navbar({ toggleSidebar }) {
     }
   };
 
-  const handleLogout = () => {
+  const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     navigate("/login");
   };
 
-  const handleLogoClick = () => {
-    if (token) navigate("/home");
-    else navigate("/login");
+  const goHome = () => {
+    if (!token) return navigate("/login");
+
+    if (role === "ADMIN") {
+      navigate("/dashboard");
+    } else {
+      navigate("/home");
+    }
   };
 
   const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/signup";
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password";
+
+  const navBtn = (path, label) => {
+    const active = location.pathname === path;
+
+    return (
+      <button
+        onClick={() => navigate(path)}
+        className={`px-4 py-2 rounded-xl text-sm transition ${
+          active
+            ? "bg-green-500/15 text-green-400 border border-green-500/20"
+            : "hover:bg-white/5 text-gray-300 hover:text-white"
+        }`}
+      >
+        {label}
+      </button>
+    );
+  };
 
   return (
-    <div
-      className="sticky top-0 z-50 
-      bg-gray-900/80 backdrop-blur-md text-white 
-      border-b border-gray-700/50 
-      shadow-md px-3 sm:px-6 py-3 flex justify-between items-center"
+    <header
+      className="
+      sticky top-0 z-50
+      border-b border-white/10
+      bg-slate-950/85
+      backdrop-blur-xl
+      text-white
+    "
     >
-      {/* 🌱 LOGO */}
       <div
-        onClick={handleLogoClick}
-        className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
+        className="
+        max-w-[1700px] mx-auto
+        px-3 sm:px-6 lg:px-8
+        h-16
+        flex items-center justify-between
+      "
       >
-        <h1
-          className="text-sm sm:text-xl md:text-2xl font-semibold 
-        tracking-wide text-gray-200 group-hover:text-green-400 transition truncate"
-        >
-          उन्नतशील बीज भंडार
-        </h1>
-
-        <span
-          className="text-green-400 text-lg sm:text-xl 
-        group-hover:scale-110 transition"
-        >
-          🌱
-        </span>
-      </div>
-
-      {/* RIGHT */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        {/* 🛒 CART (ONLY USER) */}
-        {token && role === "USER" && !isAuthPage && (
-          <button
-            onClick={() => navigate("/cart")}
-            className="relative px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
-            rounded-lg transition"
-          >
-            🛒
-            {cartCount > 0 && (
-              <span
-                className="absolute -top-2 -right-2 
-              bg-green-500 text-white text-xs px-1.5 py-0.5 
-              rounded-full"
+        {/* LEFT */}
+        <div className="flex items-center gap-3">
+          {/* ADMIN MOBILE SIDEBAR */}
+          {toggleSidebar &&
+            role === "ADMIN" && (
+              <button
+                onClick={toggleSidebar}
+                className="
+                md:hidden
+                w-10 h-10 rounded-xl
+                bg-white/5 hover:bg-white/10
+                transition
+              "
               >
-                {cartCount}
-              </span>
+                ☰
+              </button>
             )}
-          </button>
-        )}
 
-        {/* 🌙 THEME */}
-        <button
-          onClick={toggleTheme}
-          className="px-2 sm:px-3 py-1.5 bg-gray-800 hover:bg-gray-700 
-          rounded-lg transition"
-        >
-          {dark ? "☀️" : "🌙"}
-        </button>
-
-        {/* 🔐 AUTH */}
-        {!isAuthPage && !token && (
-          <div className="hidden sm:flex items-center gap-3">
-            <Link to="/login" className="text-gray-300 hover:text-white">
-              Login
-            </Link>
-
-            <Link
-              to="/signup"
-              className="bg-green-500 hover:bg-green-600 
-              text-white px-3 py-1.5 rounded-lg"
+          {/* LOGO */}
+          <button
+            onClick={goHome}
+            className="flex items-center gap-3 group"
+          >
+            <div
+              className="
+              w-10 h-10 rounded-2xl
+              bg-gradient-to-r from-green-500 to-emerald-500
+              flex items-center justify-center
+              text-lg shadow-lg
+            "
             >
-              Signup
-            </Link>
-          </div>
-        )}
+              🌱
+            </div>
 
-        {/* 🚪 LOGOUT */}
-        {token && (
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 
-            px-2 sm:px-4 py-1.5 rounded-lg"
-          >
-            Logout
-          </button>
-        )}
-        {/* Orders */}
-        {token && role === "USER" && (
-          <button
-            onClick={() => navigate("/orders")}
-            className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg"
-          >
-            📦 Orders
-          </button>
-        )}
+            <div className="text-left leading-tight">
+              <h1
+                className="
+                text-base sm:text-xl font-bold tracking-wide
+                group-hover:text-green-400 transition
+              "
+              >
+                Agro App
+              </h1>
 
-        {token && role === "ADMIN" && (
-          <button
-            onClick={() => navigate("/admin/orders")}
-            className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
-          >
-            Orders
+              <p className="text-[11px] text-gray-400 mt-1 hidden sm:block">
+                Smart Agriculture Commerce
+              </p>
+            </div>
           </button>
-        )}
+        </div>
 
-        {/* ☰ SIDEBAR (ADMIN ONLY) */}
-        {toggleSidebar && role === "ADMIN" && (
+        {/* CENTER USER NAV ONLY */}
+        {token &&
+          role === "USER" &&
+          !isAuthPage && (
+            <nav className="hidden lg:flex items-center gap-4">
+              {navBtn("/home", "Home")}
+              {navBtn("/orders", "Orders")}
+            </nav>
+          )}
+
+        {/* RIGHT */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* USER CART ICON ONLY */}
+          {token &&
+            role === "USER" &&
+            !isAuthPage && (
+              <button
+                onClick={() =>
+                  navigate("/cart")
+                }
+                className="
+                relative w-10 h-10 rounded-xl
+                bg-white/5 hover:bg-white/10
+                transition
+              "
+              >
+                🛒
+
+                {cartCount > 0 && (
+                  <span
+                    className="
+                    absolute -top-1 -right-1
+                    min-w-[20px] h-5 px-1
+                    rounded-full
+                    bg-green-500 text-xs
+                    flex items-center justify-center
+                  "
+                  >
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+          {/* ADMIN BUTTONS (UNCHANGED) */}
+          {token &&
+            role === "ADMIN" && (
+              <button
+                onClick={() =>
+                  navigate(
+                    "/admin/orders"
+                  )
+                }
+                className="
+                hidden sm:block
+                px-4 py-2 rounded-xl
+                bg-blue-600 hover:bg-blue-700
+                text-sm font-medium
+              "
+              >
+                Orders
+              </button>
+            )}
+
+          {/* THEME */}
           <button
-            onClick={toggleSidebar}
-            className="sm:hidden px-2 py-1.5 bg-gray-800 rounded-lg"
+            onClick={toggleTheme}
+            className="
+            w-10 h-10 rounded-xl
+            bg-white/5 hover:bg-white/10
+            transition
+          "
           >
-            ☰
+            {dark ? "☀️" : "🌙"}
           </button>
-        )}
+
+          {/* GUEST */}
+          {!token && !isAuthPage && (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-xl hover:bg-white/5 text-sm"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/signup"
+                className="
+                px-4 py-2 rounded-xl
+                bg-green-600 hover:bg-green-700
+                text-sm font-medium
+              "
+              >
+                Signup
+              </Link>
+            </div>
+          )}
+
+          {/* LOGOUT */}
+          {token && (
+            <button
+              onClick={logout}
+              className="
+              px-3 sm:px-4 py-2 rounded-xl
+              bg-red-600 hover:bg-red-700
+              text-sm font-medium
+            "
+            >
+              Logout
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 

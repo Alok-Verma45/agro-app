@@ -1,14 +1,35 @@
 import API from "./axios";
 
-// GET all products
+// ===========================
+// GET ALL PRODUCTS
+// ===========================
 export const getProducts = () =>
   API.get("/products");
 
-// ADD product
-export const addProduct = (data) =>
-  API.post("/products", data);
+// ===========================
+// GET SINGLE PRODUCT BY ID
+// ===========================
+export const getProductById = (
+  id
+) =>
+  API.get(
+    `/products/${id}`
+  );
 
-// UPDATE full product
+// ===========================
+// ADD PRODUCT
+// ===========================
+export const addProduct = (
+  data
+) =>
+  API.post(
+    "/products",
+    data
+  );
+
+// ===========================
+// UPDATE FULL PRODUCT
+// ===========================
 export const updateProduct = (
   id,
   data
@@ -18,7 +39,9 @@ export const updateProduct = (
     data
   );
 
+// ===========================
 // UPDATE STOCK ONLY
+// ===========================
 export const updateProductStock = (
   id,
   quantity
@@ -28,7 +51,9 @@ export const updateProductStock = (
     { quantity }
   );
 
+// ===========================
 // QUICK ADD STOCK
+// ===========================
 export const addStock = (
   id,
   qty
@@ -38,7 +63,9 @@ export const addStock = (
     { quantity: qty }
   );
 
-// DELETE product
+// ===========================
+// DELETE PRODUCT
+// ===========================
 export const deleteProduct = (
   id
 ) =>

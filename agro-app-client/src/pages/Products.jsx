@@ -7,267 +7,505 @@ import {
 } from "../api/productApi";
 
 function Products() {
-  const [products, setProducts] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [search, setSearch] = useState("");
-  const [toast, setToast] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] =
+    useState([]);
 
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    quantity: "",
-  });
+  const [showForm, setShowForm] =
+    useState(false);
+
+  const [editingId, setEditingId] =
+    useState(null);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [toast, setToast] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [form, setForm] =
+    useState({
+      name: "",
+      price: "",
+      quantity: "",
+      imageUrl: "",
+    });
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      const res = await getProducts();
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchProducts =
+    async () => {
+      try {
+        const res =
+          await getProducts();
 
-  const handleAddProduct = async () => {
-    if (!form.name || !form.price) {
-      setToast("⚠️ Name & Price required (नाम और कीमत जरूरी है)");
-      return;
-    }
-
-    const payload = {
-      name: form.name,
-      price: Number(form.price),
-      quantity: form.quantity ? Number(form.quantity) : 0,
+        setProducts(
+          res.data
+        );
+      } catch (err) {
+        console.error(
+          err
+        );
+      } finally {
+        setLoading(false);
+      }
     };
 
-    try {
-      if (editingId) {
-        await updateProduct(editingId, payload);
-        setToast("✅ Product updated (उत्पाद अपडेट हुआ)");
-      } else {
-        await addProduct(payload);
-        setToast("✅ Product added (उत्पाद जोड़ा गया)");
+  const handleAddProduct =
+    async () => {
+      if (
+        !form.name ||
+        !form.price
+      ) {
+        setToast(
+          "⚠️ Name & Price required"
+        );
+        return;
       }
 
-      setForm({ name: "", price: "", quantity: "" });
-      setEditingId(null);
-      setShowForm(false);
+      const payload = {
+        name: form.name,
+        price: Number(
+          form.price
+        ),
+        quantity:
+          form.quantity
+            ? Number(
+                form.quantity
+              )
+            : 0,
+        imageUrl:
+          form.imageUrl,
+      };
+
+      try {
+        if (
+          editingId
+        ) {
+          await updateProduct(
+            editingId,
+            payload
+          );
+
+          setToast(
+            "✅ Product updated"
+          );
+        } else {
+          await addProduct(
+            payload
+          );
+
+          setToast(
+            "✅ Product added"
+          );
+        }
+
+        setForm({
+          name: "",
+          price: "",
+          quantity: "",
+          imageUrl: "",
+        });
+
+        setEditingId(
+          null
+        );
+
+        setShowForm(
+          false
+        );
+
+        fetchProducts();
+      } catch {
+        setToast(
+          "❌ Error occurred"
+        );
+      } finally {
+        setTimeout(
+          () =>
+            setToast(
+              ""
+            ),
+          2000
+        );
+      }
+    };
+
+  const handleDeleteProduct =
+    async (id) => {
+      if (
+        !confirm(
+          "Delete this product?"
+        )
+      )
+        return;
+
+      await deleteProduct(
+        id
+      );
+
       fetchProducts();
-    } catch {
-      setToast("❌ Error occurred (कुछ गलत हुआ)");
-    } finally {
-      setTimeout(() => setToast(""), 2000);
-    }
-  };
 
-  const handleDeleteProduct = async (id) => {
-    if (!confirm("Delete this product? (उत्पाद हटाना है?)")) return;
+      setToast(
+        "🗑️ Product deleted"
+      );
 
-    await deleteProduct(id);
-    fetchProducts();
+      setTimeout(
+        () =>
+          setToast(""),
+        2000
+      );
+    };
 
-    setToast("🗑️ Product deleted (उत्पाद हटाया गया)");
-    setTimeout(() => setToast(""), 2000);
-  };
+  const handleEditProduct =
+    (p) => {
+      setForm({
+        name: p.name,
+        price: p.price,
+        quantity:
+          p.quantity,
+        imageUrl:
+          p.imageUrl ||
+          "",
+      });
 
-  const handleEditProduct = (p) => {
-    setForm({
-      name: p.name,
-      price: p.price,
-      quantity: p.quantity,
-    });
-    setEditingId(p.id);
-    setShowForm(true);
-  };
+      setEditingId(
+        p.id
+      );
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.price.toString().includes(search)
-  );
+      setShowForm(
+        true
+      );
+    };
+
+  const filteredProducts =
+    products.filter(
+      (p) =>
+        p.name
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+        p.price
+          .toString()
+          .includes(
+            search
+          )
+    );
+
+  const getImageUrl =
+    (path) => {
+      if (!path)
+        return "https://via.placeholder.com/80?text=No+Image";
+
+      return `http://localhost:8080${path}`;
+    };
 
   return (
-    <div className="py-6 space-y-6 animate-fadeIn">
+    <div className="py-6 space-y-6">
 
       {/* SEARCH */}
       <input
         type="text"
-        placeholder="🔍 उत्पाद खोजें (Search products)..."
-        className="w-full p-3 sm:p-4 rounded-xl 
-        bg-white/5 backdrop-blur-xl
-        border border-white/10
-        text-white
-        focus:ring-2 focus:ring-green-400 outline-none"
+        placeholder="🔍 Search products..."
+        className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(
+          e
+        ) =>
+          setSearch(
+            e.target
+              .value
+          )
+        }
       />
 
       {/* CARD */}
-      <div className="bg-white/5 backdrop-blur-xl 
-      border border-white/10 
-      p-4 sm:p-6 rounded-2xl shadow-lg">
+      <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
 
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row justify-between 
-        items-start sm:items-center gap-3 mb-6">
+        <div className="flex justify-between items-center mb-6">
 
-          <h1 className="text-xl sm:text-2xl font-bold">
-            📦 उत्पाद सूची (Products)
+          <h1 className="text-2xl font-bold">
+            📦 Products
           </h1>
 
           <button
             onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setForm({ name: "", price: "", quantity: "" });
+              setShowForm(
+                true
+              );
+
+              setEditingId(
+                null
+              );
+
+              setForm({
+                name: "",
+                price: "",
+                quantity:
+                  "",
+                imageUrl:
+                  "",
+              });
             }}
-            className="w-full sm:w-auto bg-green-500 hover:bg-green-600 
-            text-white px-5 py-2 rounded-xl shadow-md transition hover:scale-105"
+            className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl"
           >
-            + नया उत्पाद
+            + New Product
           </button>
+
         </div>
 
         {/* LIST */}
         {loading ? (
-          <p className="text-gray-400">Loading...</p>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-400 text-lg">
-              🚫 कोई उत्पाद नहीं मिला
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              (No products found)
-            </p>
-          </div>
+          <p>
+            Loading...
+          </p>
+        ) : filteredProducts.length ===
+          0 ? (
+          <p>
+            No products found
+          </p>
         ) : (
           <div className="space-y-4">
-            {filteredProducts.map((p) => (
-              <div
-                key={p.id}
-                className="flex flex-col sm:flex-row justify-between 
-                sm:items-center gap-4 p-4 rounded-xl
-                bg-white/5 hover:scale-[1.02] hover:shadow-lg transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 flex items-center justify-center 
-                  rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
-                  text-white font-bold text-lg">
-                    {p.name.charAt(0).toUpperCase()}
+
+            {filteredProducts.map(
+              (p) => (
+                <div
+                  key={
+                    p.id
+                  }
+                  className="flex justify-between items-center p-4 rounded-xl bg-white/5"
+                >
+
+                  <div className="flex items-center gap-4">
+
+                    {/* PRODUCT IMAGE */}
+                    <img
+                      src={getImageUrl(
+                        p.imageUrl
+                      )}
+                      alt={
+                        p.name
+                      }
+                      className="w-14 h-14 rounded-xl object-cover border border-white/10"
+                      onError={(
+                        e
+                      ) => {
+                        e.target.src =
+                          "https://via.placeholder.com/80?text=No+Image";
+                      }}
+                    />
+
+                    <div>
+                      <p className="font-semibold">
+                        {
+                          p.name
+                        }
+                      </p>
+
+                      <p className="text-sm text-gray-400">
+                        Qty:{" "}
+                        {
+                          p.quantity
+                        }
+                      </p>
+                    </div>
+
                   </div>
 
-                  <div>
-                    <p className="font-semibold text-lg">{p.name}</p>
-                    <p className="text-sm text-gray-400">
-                      मात्रा (Qty): {p.quantity}
-                    </p>
-                  </div>
-                </div>
+                  <div className="flex items-center gap-4">
 
-                <div className="flex flex-col sm:flex-row 
-                items-start sm:items-center gap-3 sm:gap-6">
+                    <span className="text-green-400 font-bold">
+                      ₹
+                      {
+                        p.price
+                      }
+                    </span>
 
-                  <span className="text-blue-500 font-bold text-lg">
-                    ₹{p.price}
-                  </span>
-
-                  <div className="flex gap-2 flex-wrap">
                     <button
-                      onClick={() => handleEditProduct(p)}
-                      className="px-3 py-1 rounded-lg 
-                      bg-blue-500 hover:bg-blue-600 text-white shadow-md"
+                      onClick={() =>
+                        handleEditProduct(
+                          p
+                        )
+                      }
+                      className="px-3 py-1 bg-blue-500 text-white rounded-lg"
                     >
                       Edit
                     </button>
 
                     <button
-                      onClick={() => handleDeleteProduct(p.id)}
-                      className="px-3 py-1 rounded-lg 
-                      bg-red-500 hover:bg-red-600 text-white shadow-md"
+                      onClick={() =>
+                        handleDeleteProduct(
+                          p.id
+                        )
+                      }
+                      className="px-3 py-1 bg-red-500 text-white rounded-lg"
                     >
                       Delete
                     </button>
+
                   </div>
+
                 </div>
-              </div>
-            ))}
+              )
+            )}
+
           </div>
         )}
       </div>
 
       {/* MODAL */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center 
-        bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
 
-          <div className="bg-white dark:bg-gray-800 
-          p-6 rounded-2xl shadow-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl w-full max-w-md">
 
             <h2 className="text-lg font-semibold mb-4">
               {editingId
-                ? "✏️ उत्पाद संपादित करें"
-                : "➕ नया उत्पाद"}
+                ? "Edit Product"
+                : "New Product"}
             </h2>
 
-            <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col gap-3">
+
               <input
-                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="नाम (Name)"
-                value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
+                placeholder="Name"
+                value={
+                  form.name
                 }
+                onChange={(
+                  e
+                ) =>
+                  setForm(
+                    {
+                      ...form,
+                      name: e
+                        .target
+                        .value,
+                    }
+                  )
+                }
+                className="p-3 rounded bg-gray-100 dark:bg-gray-700"
               />
 
               <input
-                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="कीमत (Price)"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
+                placeholder="Price"
+                value={
+                  form.price
                 }
+                onChange={(
+                  e
+                ) =>
+                  setForm(
+                    {
+                      ...form,
+                      price:
+                        e
+                          .target
+                          .value,
+                    }
+                  )
+                }
+                className="p-3 rounded bg-gray-100 dark:bg-gray-700"
               />
 
               <input
-                className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                placeholder="मात्रा (Quantity)"
-                value={form.quantity}
-                onChange={(e) =>
-                  setForm({ ...form, quantity: e.target.value })
+                placeholder="Quantity"
+                value={
+                  form.quantity
                 }
+                onChange={(
+                  e
+                ) =>
+                  setForm(
+                    {
+                      ...form,
+                      quantity:
+                        e
+                          .target
+                          .value,
+                    }
+                  )
+                }
+                className="p-3 rounded bg-gray-100 dark:bg-gray-700"
               />
+
+              <input
+                placeholder="/products/urea.jpg"
+                value={
+                  form.imageUrl
+                }
+                onChange={(
+                  e
+                ) =>
+                  setForm(
+                    {
+                      ...form,
+                      imageUrl:
+                        e
+                          .target
+                          .value,
+                    }
+                  )
+                }
+                className="p-3 rounded bg-gray-100 dark:bg-gray-700"
+              />
+
+              {/* IMAGE PREVIEW */}
+              {form.imageUrl && (
+                <img
+                  src={getImageUrl(
+                    form.imageUrl
+                  )}
+                  alt="Preview"
+                  className="w-full h-40 rounded-xl object-cover border"
+                  onError={(
+                    e
+                  ) => {
+                    e.target.style.display =
+                      "none";
+                  }}
+                />
+              )}
+
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-5">
+
               <button
-                onClick={() => setShowForm(false)}
-                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600"
+                onClick={() =>
+                  setShowForm(
+                    false
+                  )
+                }
+                className="px-4 py-2 bg-gray-300 rounded"
               >
                 Cancel
               </button>
 
               <button
-                onClick={handleAddProduct}
-                className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
+                onClick={
+                  handleAddProduct
+                }
+                className="px-4 py-2 bg-green-500 text-white rounded"
               >
                 Save
               </button>
+
             </div>
+
           </div>
         </div>
       )}
 
       {/* TOAST */}
       {toast && (
-        <div className="fixed bottom-5 right-5 
-        bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        <div className="fixed bottom-5 right-5 bg-black text-white px-4 py-2 rounded-lg">
           {toast}
         </div>
       )}
