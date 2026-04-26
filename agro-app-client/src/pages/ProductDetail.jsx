@@ -71,13 +71,17 @@ function ProductDetail() {
     }
   };
 
-  const getImageUrl =
-    (path) => {
-      if (!path)
-        return "https://via.placeholder.com/600x600?text=No+Image";
+  const getImageUrl = (path) => {
+  if (!path) {
+    return "https://via.placeholder.com/600x600?text=No+Image";
+  }
 
-      return `http://localhost:8080${path}`;
-    };
+  if (path.startsWith("http")) {
+    return path;
+  }
+
+  return `http://localhost:8080${path}`;
+};
 
   // =========================
   // QTY

@@ -28,12 +28,16 @@ function Home() {
   // IMAGE URL
   // =====================================
   const getImageUrl = (path) => {
-    if (!path) {
-      return "https://via.placeholder.com/400x300?text=No+Image";
-    }
+  if (!path) {
+    return "https://via.placeholder.com/400x300?text=No+Image";
+  }
 
-    return `http://localhost:8080${path}`;
-  };
+  if (path.startsWith("http")) {
+    return path;
+  }
+
+  return `http://localhost:8080${path}`;
+};
 
   // =====================================
   // ADD TO CART
