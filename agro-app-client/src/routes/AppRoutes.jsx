@@ -6,6 +6,7 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Privacy from "../pages/Privacy";
 import Terms from "../pages/Terms";
+import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import Orders from "../pages/Orders";
@@ -15,7 +16,7 @@ import PaymentSuccess from "../pages/PaymentSuccess";
 
 import OfflineDashboard from "../pages/OfflineDashboard";
 import Customers from "../pages/Customers";
-import Products from "../pages/Products";
+import AdminProducts from "../pages/AdminProducts";
 import Credits from "../pages/Credits";
 import BillingPage from "../pages/BillingPage";
 
@@ -38,8 +39,10 @@ import ResetPassword from "../pages/ResetPassword";
 const AdminRoute = ({ children }) => {
   const role = localStorage.getItem("role");
 
-  if (!role || role !== "ADMIN") {
-    return <Navigate to="/home" replace />;
+  const token = localStorage.getItem("token");
+
+  if (!token || !role || role.toUpperCase() !== "ADMIN") {
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -65,6 +68,7 @@ function AppRoutes() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/products" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<Orders />} />
@@ -125,10 +129,10 @@ function AppRoutes() {
         />
 
         <Route
-          path="/products"
+          path="/admin/products"
           element={
             <AdminRoute>
-              <Products />
+              <AdminProducts />
             </AdminRoute>
           }
         />

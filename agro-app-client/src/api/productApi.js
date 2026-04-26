@@ -9,23 +9,19 @@ export const getProducts = () =>
 // ===========================
 // GET SINGLE PRODUCT BY ID
 // ===========================
-export const getProductById = (
-  id
-) =>
-  API.get(
-    `/products/${id}`
-  );
+export const getProductById = (id) =>
+  API.get(`/products/${id}`);
 
 // ===========================
-// ADD PRODUCT
+// ADD PRODUCT (Cloudinary)
 // ===========================
-export const addProduct = (
-  data
-) =>
-  API.post(
-    "/products",
-    data
-  );
+export const addProduct = (data) =>
+  API.post("/products", data, {
+    headers: {
+      "Content-Type":
+        "multipart/form-data",
+    },
+  });
 
 // ===========================
 // UPDATE FULL PRODUCT

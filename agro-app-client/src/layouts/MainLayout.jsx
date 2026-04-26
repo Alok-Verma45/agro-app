@@ -54,7 +54,7 @@ function MainLayout() {
       icon: "🌐",
       label: "Online Dashboard",
     },
-    { to: "/products", icon: "📦", label: "Products" },
+    { to: "/admin/products", icon: "📦", label: "Products" },
     { to: "/admin/users", icon: "🧑‍💼", label: "Users" },
     { to: "/admin/orders", icon: "📬", label: "Orders" },
   ];
