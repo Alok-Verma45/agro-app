@@ -122,7 +122,7 @@ function Products() {
     );
 
   return (
-    <div className="py-8 px-4 md:px-8 space-y-6">
+    <div className="py-8 px-4 md:px-8 space-y-6 text-gray-900 dark:text-white">
 
       {/* HEADER */}
       <div className="space-y-4">
@@ -131,7 +131,7 @@ function Products() {
           🌾 Products
         </h1>
 
-        <p className="text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400">
           Premium farming essentials for every season.
         </p>
 
@@ -146,7 +146,13 @@ function Products() {
                 e.target.value
               )
             }
-            className="p-4 rounded-xl bg-white/5 border border-white/10 outline-none"
+            className="
+            p-4 rounded-xl outline-none
+            bg-white dark:bg-white/5
+            border border-gray-300 dark:border-white/10
+            text-gray-900 dark:text-white
+            placeholder:text-gray-500 dark:placeholder:text-gray-400
+          "
           />
 
           <select
@@ -156,13 +162,19 @@ function Products() {
                 e.target.value
               )
             }
-            className="p-4 rounded-xl bg-white/5 border border-white/10 outline-none"
+            className="
+            p-4 rounded-xl outline-none
+            bg-white dark:bg-white/5
+            border border-gray-300 dark:border-white/10
+            text-gray-900 dark:text-white
+          "
           >
             {categories.map(
               (cat) => (
                 <option
                   key={cat}
                   value={cat}
+                  className="text-black"
                 >
                   {cat}
                 </option>
@@ -191,7 +203,12 @@ function Products() {
             (p) => (
               <div
                 key={p.id}
-                className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-xl transition"
+                className="
+                rounded-2xl overflow-hidden transition
+                border border-gray-200 dark:border-white/10
+                bg-white dark:bg-white/5
+                hover:-translate-y-1 hover:shadow-xl
+              "
               >
 
                 <img
@@ -216,7 +233,7 @@ function Products() {
                       {p.name}
                     </h2>
 
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {p.category}
                     </p>
 
@@ -224,17 +241,17 @@ function Products() {
 
                   <div className="flex justify-between items-center">
 
-                    <span className="text-xl font-bold text-green-400">
+                    <span className="text-xl font-bold text-green-500 dark:text-green-400">
                       ₹{p.price}
                     </span>
 
                     {p.quantity >
                     0 ? (
-                      <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                      <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-500 dark:text-green-400">
                         In Stock
                       </span>
                     ) : (
-                      <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400">
+                      <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-500 dark:text-red-400">
                         Out
                       </span>
                     )}

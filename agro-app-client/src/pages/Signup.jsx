@@ -10,182 +10,351 @@ function Signup() {
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   const navigate = useNavigate();
 
-  // 🔥 VALIDATION
+  // =====================
+  // VALIDATION
+  // =====================
   const validate = () => {
-    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
-      return "⚠️ सभी फील्ड भरें (Fill all fields)";
+    if (
+      !form.name ||
+      !form.email ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
+      return "Please fill all fields";
     }
 
     if (form.name.length < 3) {
-      return "⚠️ नाम कम से कम 3 अक्षरों का होना चाहिए";
+      return "Name must be at least 3 characters";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      return "⚠️ सही Email डालें (Enter valid email)";
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailRegex.test(form.email)
+    ) {
+      return "Enter a valid email";
     }
 
-    if (form.password.length < 4) {
-      return "⚠️ Password कम से कम 4 characters का होना चाहिए";
+    if (
+      form.password.length < 4
+    ) {
+      return "Password must be at least 4 characters";
     }
 
-    if (form.password !== form.confirmPassword) {
-      return "⚠️ Password match नहीं कर रहा";
+    if (
+      form.password !==
+      form.confirmPassword
+    ) {
+      return "Passwords do not match";
     }
 
     return null;
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault(); // 🔥 IMPORTANT (form submit)
+  const handleSignup =
+    async (e) => {
+      e.preventDefault();
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+      const validationError =
+        validate();
 
-    setLoading(true);
-    setError("");
+      if (validationError) {
+        setError(
+          validationError
+        );
+        return;
+      }
 
-    try {
-      await signupUser({
-        name: form.name,
-        email: form.email,
-        password: form.password,
-      });
+      setLoading(true);
+      setError("");
 
-      navigate("/login");
-    } catch {
-      setError("❌ Signup failed (साइनअप असफल)");
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        await signupUser({
+          name: form.name,
+          email: form.email,
+          password:
+            form.password,
+        });
+
+        navigate("/login");
+      } catch {
+        setError(
+          "Signup failed"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-    px-4 sm:px-6
-    bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-
-      {/* 🔥 FORM WRAP */}
+    <div
+      className="
+      min-h-screen
+      flex items-center justify-center
+      px-4 py-4
+      bg-gradient-to-br
+      from-slate-950 via-slate-900 to-green-950
+    "
+    >
+      {/* CARD */}
       <form
-        onSubmit={handleSignup}
-        className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-2xl sm:rounded-3xl 
-        bg-white/10 backdrop-blur-xl border border-white/20 
-        shadow-2xl"
+        onSubmit={
+          handleSignup
+        }
+        className="
+        w-full max-w-md
+        rounded-3xl
+        px-6 sm:px-8
+        py-6
+        bg-white/10
+        backdrop-blur-2xl
+        border border-white/10
+        shadow-2xl
+        space-y-5
+      "
       >
+        {/* TOP */}
+        <div className="text-center space-y-2">
+          <div
+            className="
+            w-14 h-14 mx-auto
+            rounded-2xl
+            bg-gradient-to-r from-green-500 to-emerald-500
+            flex items-center justify-center
+            text-2xl
+            shadow-lg shadow-green-500/30
+          "
+          >
+            🌱
+          </div>
 
-        {/* 🌱 BRAND */}
-        <div className="text-center mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-green-400">
-            उन्नतशील बीज भंडार 🌱
+          <h1 className="text-3xl font-bold text-white">
+            Agro App
           </h1>
-          <p className="text-gray-300 text-xs sm:text-sm mt-1">
-            अपना खाता बनाएं <br />
-            <span className="text-gray-400">
-              (Create your account)
-            </span>
+
+          <p className="text-sm text-gray-300">
+            Smart Agriculture Platform
           </p>
         </div>
 
-        {/* 🚀 TITLE */}
-        <h2 className="text-lg sm:text-xl font-semibold text-center mb-4 text-white">
-          🚀 Signup करें (Signup)
+        {/* TITLE */}
+        <h2 className="text-center text-xl font-semibold text-white">
+          Create Account 🚀
         </h2>
 
         {/* ERROR */}
         {error && (
-          <p className="text-red-400 text-sm mb-3 text-center">
+          <div
+            className="
+            text-red-400 text-sm text-center
+            py-2 rounded-xl
+            bg-red-500/10 border border-red-500/20
+          "
+          >
             {error}
-          </p>
+          </div>
         )}
 
-        {/* 👤 NAME */}
-        <input
-          placeholder="👤 नाम (Name)"
-          className="w-full mb-3 p-3 rounded-xl 
-          bg-white/20 text-white placeholder-gray-300
-          outline-none focus:ring-2 focus:ring-green-400"
-          value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-        />
+        {/* NAME */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">
+            Full Name
+          </label>
 
-        {/* 📧 EMAIL */}
-        <input
-          type="email"
-          placeholder="📧 Email"
-          className="w-full mb-3 p-3 rounded-xl 
-          bg-white/20 text-white placeholder-gray-300
-          outline-none focus:ring-2 focus:ring-green-400"
-          value={form.email}
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
-
-        {/* 🔑 PASSWORD */}
-        <div className="relative mb-3">
           <input
-            type={showPassword ? "text" : "password"}
-            placeholder="🔑 Password"
-            className="w-full p-3 rounded-xl 
-            bg-white/20 text-white placeholder-gray-300
-            outline-none focus:ring-2 focus:ring-green-400"
-            value={form.password}
+            type="text"
+            placeholder="Enter your name"
+            value={form.name}
             onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
             }
+            className="
+            w-full h-12 px-4
+            rounded-2xl
+            bg-white/10
+            border border-white/10
+            text-white placeholder-gray-400
+            outline-none
+            focus:ring-2 focus:ring-green-500/30
+            focus:border-green-400
+          "
           />
-
-          <span
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-3 cursor-pointer text-gray-300 hover:text-white"
-          >
-            {showPassword ? "🙈" : "👁️"}
-          </span>
         </div>
 
-        {/* 🔁 CONFIRM PASSWORD */}
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="🔁 Confirm Password"
-          className="w-full mb-4 p-3 rounded-xl 
-          bg-white/20 text-white placeholder-gray-300
-          outline-none focus:ring-2 focus:ring-green-400"
-          value={form.confirmPassword}
-          onChange={(e) =>
-            setForm({ ...form, confirmPassword: e.target.value })
-          }
-        />
+        {/* EMAIL */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">
+            Email
+          </label>
 
-        {/* 🚀 BUTTON */}
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
+            }
+            className="
+            w-full h-12 px-4
+            rounded-2xl
+            bg-white/10
+            border border-white/10
+            text-white placeholder-gray-400
+            outline-none
+            focus:ring-2 focus:ring-green-500/30
+            focus:border-green-400
+          "
+          />
+        </div>
+
+        {/* PASSWORD */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">
+            Password
+          </label>
+
+          <div className="relative">
+            <input
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Enter password"
+              value={
+                form.password
+              }
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  password:
+                    e.target.value,
+                })
+              }
+              className="
+              w-full h-12 px-4 pr-12
+              rounded-2xl
+              bg-white/10
+              border border-white/10
+              text-white placeholder-gray-400
+              outline-none
+              focus:ring-2 focus:ring-green-500/30
+              focus:border-green-400
+            "
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+              className="
+              absolute right-4 top-1/2 -translate-y-1/2
+              text-gray-400 hover:text-white
+            "
+            >
+              {showPassword
+                ? "🙈"
+                : "👁️"}
+            </button>
+          </div>
+        </div>
+
+        {/* CONFIRM PASSWORD */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">
+            Confirm Password
+          </label>
+
+          <input
+            type={
+              showPassword
+                ? "text"
+                : "password"
+            }
+            placeholder="Re-enter password"
+            value={
+              form.confirmPassword
+            }
+            onChange={(e) =>
+              setForm({
+                ...form,
+                confirmPassword:
+                  e.target.value,
+              })
+            }
+            className="
+            w-full h-12 px-4
+            rounded-2xl
+            bg-white/10
+            border border-white/10
+            text-white placeholder-gray-400
+            outline-none
+            focus:ring-2 focus:ring-green-500/30
+            focus:border-green-400
+          "
+          />
+        </div>
+
+        {/* BUTTON */}
         <button
-          type="submit" // 🔥 IMPORTANT
+          type="submit"
           disabled={loading}
-          className="w-full py-2.5 rounded-xl 
-          bg-gradient-to-r from-green-500 to-green-600 
-          hover:scale-105 active:scale-95
-          disabled:opacity-50
-          text-white font-semibold transition"
+          className="
+          w-full h-12
+          rounded-2xl
+          bg-gradient-to-r from-green-500 to-emerald-500
+          text-white font-semibold
+          hover:scale-[1.01]
+          active:scale-[0.99]
+          transition
+          shadow-lg shadow-green-500/20
+          disabled:opacity-60
+          flex items-center justify-center gap-2
+        "
         >
+          {loading && (
+            <span
+              className="
+              w-4 h-4 border-2 border-white
+              border-t-transparent rounded-full
+              animate-spin
+            "
+            ></span>
+          )}
+
           {loading
-            ? "⏳ खाता बन रहा है..."
-            : "Signup (साइनअप करें)"}
+            ? "Creating..."
+            : "Signup"}
         </button>
 
-        {/* 🔗 LOGIN */}
-        <p className="text-xs sm:text-sm text-center mt-5 text-gray-300">
-          पहले से खाता है? (Already have an account?){" "}
-          <Link to="/login" className="text-green-400 hover:underline">
+        {/* LOGIN */}
+        <p className="text-center text-sm text-gray-300">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-green-400 font-semibold hover:text-green-300"
+          >
             Login
           </Link>
         </p>
