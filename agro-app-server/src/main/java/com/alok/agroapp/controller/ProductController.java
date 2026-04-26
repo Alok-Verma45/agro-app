@@ -1,5 +1,6 @@
 package com.alok.agroapp.controller;
 
+import com.alok.agroapp.dto.ProductRequest;
 import com.alok.agroapp.dto.UpdateStockRequest;
 import com.alok.agroapp.entity.Product;
 import com.alok.agroapp.service.ProductService;
@@ -26,16 +27,20 @@ public class ProductController {
     // ===============================
     // CREATE PRODUCT
     // ===============================
-    @PostMapping
+    @PostMapping(
+            consumes =
+                    "multipart/form-data"
+    )
     public ResponseEntity<Product>
     createProduct(
-            @RequestBody Product product
+            @ModelAttribute
+            ProductRequest request
     ) {
 
         Product saved =
                 productService
                         .createProduct(
-                                product
+                                request
                         );
 
         return ResponseEntity
@@ -74,64 +79,68 @@ public class ProductController {
     }
 
     // ===============================
-    // FULL UPDATE PRODUCT
+    // UPDATE PRODUCT
     // ===============================
-    @PutMapping("/{id}")
+    @PutMapping(
+            value = "/{id}",
+            consumes =
+                    "multipart/form-data"
+    )
     public ResponseEntity<Product>
     updateProduct(
             @PathVariable Long id,
-            @RequestBody Product product
+            @ModelAttribute
+            ProductRequest request
     ) {
 
         return ResponseEntity.ok(
                 productService
                         .updateProduct(
                                 id,
-                                product
+                                request
                         )
         );
     }
 
     // ===============================
     // UPDATE STOCK EXACT VALUE
-    // Example: 55
     // ===============================
     @PutMapping("/{id}/stock")
     public ResponseEntity<Product>
     updateStock(
             @PathVariable Long id,
-            @RequestBody UpdateStockRequest request
+            @RequestBody
+            UpdateStockRequest request
     ) {
 
         return ResponseEntity.ok(
                 productService
                         .updateStock(
                                 id,
-                                request.getQuantity()
+                                request
+                                        .getQuantity()
                         )
         );
     }
 
     // ===============================
     // QUICK ADD STOCK
-    // current + qty
     // ===============================
     @PatchMapping("/{id}/add-stock")
     public ResponseEntity<Product>
     addStock(
             @PathVariable Long id,
-            @RequestBody UpdateStockRequest request
+            @RequestBody
+            UpdateStockRequest request
     ) {
 
         Product product =
                 productService
                         .getProductById(id);
 
-        Integer current =
-                product.getQuantity();
-
         Integer updated =
-                current +
+                product.getQuantity()
+                        +
                         request.getQuantity();
 
         return ResponseEntity.ok(
@@ -145,26 +154,24 @@ public class ProductController {
 
     // ===============================
     // QUICK REDUCE STOCK
-    // current - qty
     // ===============================
     @PatchMapping("/{id}/reduce-stock")
     public ResponseEntity<Product>
     reduceStock(
             @PathVariable Long id,
-            @RequestBody UpdateStockRequest request
+            @RequestBody
+            UpdateStockRequest request
     ) {
 
         Product product =
                 productService
                         .getProductById(id);
 
-        Integer current =
-                product.getQuantity();
-
         Integer updated =
                 Math.max(
                         0,
-                        current -
+                        product.getQuantity()
+                                -
                                 request.getQuantity()
                 );
 
@@ -179,21 +186,19 @@ public class ProductController {
 
     // ===============================
     // LOW STOCK PRODUCTS
-    // <=10
     // ===============================
     @GetMapping("/low-stock")
     public ResponseEntity<List<Product>>
     lowStockProducts() {
 
-        List<Product> all =
-                productService
-                        .getAllProducts();
-
         List<Product> low =
-                all.stream()
+                productService
+                        .getAllProducts()
+                        .stream()
                         .filter(
                                 p ->
-                                        p.getQuantity() <= 10
+                                        p.getQuantity()
+                                                <= 10
                         )
                         .toList();
 
@@ -209,15 +214,14 @@ public class ProductController {
     public ResponseEntity<List<Product>>
     outOfStockProducts() {
 
-        List<Product> all =
-                productService
-                        .getAllProducts();
-
         List<Product> out =
-                all.stream()
+                productService
+                        .getAllProducts()
+                        .stream()
                         .filter(
                                 p ->
-                                        p.getQuantity() == 0
+                                        p.getQuantity()
+                                                == 0
                         )
                         .toList();
 
