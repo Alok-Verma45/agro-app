@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL + "/api"
+  baseURL: "https://agro-backend-p3nq.onrender.com/api"
 });
 
 API.interceptors.request.use((config) => {
