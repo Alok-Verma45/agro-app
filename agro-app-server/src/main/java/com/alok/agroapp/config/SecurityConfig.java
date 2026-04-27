@@ -110,8 +110,10 @@ public class SecurityConfig {
                         // PUBLIC
                         // ===============================
                         .requestMatchers(
+                                "/",
+                                "/health",
                                 "/api/auth/**",
-                                "/products/**"   // ✅ static product images
+                                "/products/**"
                         ).permitAll()
 
                         // ===============================
