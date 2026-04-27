@@ -17,12 +17,19 @@ function BillingPage() {
   }, []);
 
   const fetchData = async () => {
-    const [custRes, prodRes] = await Promise.all([
-      getCustomers(),
-      getProducts(),
-    ]);
-    setCustomers(custRes.data);
-    setProducts(prodRes.data);
+    try {
+      const [custRes, prodRes] = await Promise.all([
+        getCustomers(),
+        getProducts(),
+      ]);
+
+      setCustomers(custRes.data);
+      setProducts(prodRes.data);
+    } catch (err) {
+      console.error(err);
+      setToast("Failed to load data");
+      setTimeout(() => setToast(""), 2000);
+    }
   };
 
   const updateItem = (index, field, value) => {
@@ -79,8 +86,6 @@ function BillingPage() {
     setToast(`🧾 Invoice Generated: ₹${total.toFixed(2)}`);
     setTimeout(() => setToast(""), 2000);
   };
-
-  const isItemValid = (item) => item.productId && item.quantity > 0;
 
   return (
     <div className="py-6 space-y-6">
@@ -158,7 +163,6 @@ function BillingPage() {
           <span className="text-center">Action</span>
         </div>
 
-        {/* ITEMS */}
         {/* ITEMS */}
         {form.items.map((item, index) => {
           const rowTotal = (item.quantity || 0) * (item.price || 0);

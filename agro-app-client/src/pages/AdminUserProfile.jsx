@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 
 function AdminUserProfile() {
   const { id } = useParams();
@@ -9,21 +9,13 @@ function AdminUserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
-
-  const API = `http://localhost:8080/api/admin/users/${id}`;
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-
   useEffect(() => {
     fetchUser();
   }, [id]);
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(API, { headers });
+      const res = await API.get(`/admin/users/${id}`);
       setUser(res.data);
     } catch (error) {
       console.error(error);
@@ -69,7 +61,7 @@ function AdminUserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 sm:px-6 py-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-gray-900 dark:text-white px-4 sm:px-6 py-6">
       {/* HEADER */}
       <div className="flex flex-wrap gap-3 items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">

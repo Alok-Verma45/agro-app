@@ -1,31 +1,46 @@
 package com.alok.agroapp.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "mysecretkeymysecretkeymysecretkey12345";
+    @Value("${spring.jwt.secret}")
+    private String secret;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${spring.jwt.expiration}")
+    private long expiration;
+
+    private SecretKey key;
+
+    @PostConstruct
+    public void init() {
+        key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .expiration(
+                        new Date(
+                                System.currentTimeMillis() + expiration
+                        )
+                )
                 .signWith(key)
                 .compact();
     }
 
     public String extractEmail(String token) {
         return Jwts.parser()
-                .verifyWith((javax.crypto.SecretKey) key)
+                .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()

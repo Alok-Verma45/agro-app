@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/auth"; 
+const API = `${import.meta.env.VITE_API_URL}/auth`;
 
 // 🔐 LOGIN
 export const loginUser = (data) => {
@@ -12,10 +12,12 @@ export const signupUser = (data) => {
   return axios.post(`${API}/register`, data);
 };
 
+// 📩 FORGOT PASSWORD
 export const forgotPassword = (data) => {
   return axios.post(`${API}/forgot-password`, data);
 };
 
+// 🔁 RESET PASSWORD
 export const resetPassword = (data) => {
   return axios.post(`${API}/reset-password`, data);
 };

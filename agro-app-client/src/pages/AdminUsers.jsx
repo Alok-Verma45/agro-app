@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 
 function AdminUsers() {
-
   const navigate = useNavigate();
-  
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -16,20 +15,12 @@ function AdminUsers() {
 
   const [processingId, setProcessingId] = useState(null);
 
-  const token = localStorage.getItem("token");
-
-  const API = "http://localhost:8080/api/admin/users";
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-
   // ======================================
   // FETCH USERS
   // ======================================
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(API, { headers });
+      const res = await API.get("/admin/users");
       setUsers(res.data);
     } catch (err) {
       console.error(err);
@@ -49,7 +40,7 @@ function AdminUsers() {
     return users.filter((u) =>
       `${u.name} ${u.email} ${u.phone || ""}`
         .toLowerCase()
-        .includes(search.toLowerCase())
+        .includes(search.toLowerCase()),
     );
   }, [users, search]);
 
@@ -57,12 +48,8 @@ function AdminUsers() {
   // STATS
   // ======================================
   const totalUsers = users.length;
-  const totalAdmins = users.filter(
-    (u) => u.role === "ADMIN"
-  ).length;
-  const totalCustomers = users.filter(
-    (u) => u.role === "USER"
-  ).length;
+  const totalAdmins = users.filter((u) => u.role === "ADMIN").length;
+  const totalCustomers = users.filter((u) => u.role === "USER").length;
 
   // ======================================
   // HELPERS
@@ -85,10 +72,7 @@ function AdminUsers() {
   // ======================================
   const openProfile = async (id) => {
     try {
-      const res = await axios.get(
-        `${API}/${id}`,
-        { headers }
-      );
+      const res = await API.get(`/admin/users/${id}`);
 
       setProfileModal(res.data);
     } catch (err) {
@@ -103,23 +87,14 @@ function AdminUsers() {
     try {
       setProcessingId(roleModal.id);
 
-      await axios.put(
-        `${API}/${roleModal.id}/role`,
-        null,
-        {
-          params: {
-            role: roleModal.role,
-          },
-          headers,
-        }
-      );
+      await API.put(`/admin/users/${roleModal.id}/role`, null, {
+        params: { role: roleModal.role },
+      });
 
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === roleModal.id
-            ? { ...u, role: roleModal.role }
-            : u
-        )
+          u.id === roleModal.id ? { ...u, role: roleModal.role } : u,
+        ),
       );
 
       setRoleModal(null);
@@ -137,11 +112,7 @@ function AdminUsers() {
     try {
       setProcessingId(user.id);
 
-      await axios.put(
-        `${API}/${user.id}/block`,
-        null,
-        { headers }
-      );
+      await API.put(`/admin/users/${user.id}/block`);
 
       setUsers((prev) =>
         prev.map((u) =>
@@ -150,8 +121,8 @@ function AdminUsers() {
                 ...u,
                 blocked: !u.blocked,
               }
-            : u
-        )
+            : u,
+        ),
       );
     } catch (err) {
       console.error(err);
@@ -167,16 +138,9 @@ function AdminUsers() {
     try {
       setProcessingId(deleteModal.id);
 
-      await axios.delete(
-        `${API}/${deleteModal.id}`,
-        { headers }
-      );
+      await API.delete(`/admin/users/${deleteModal.id}`);
 
-      setUsers((prev) =>
-        prev.filter(
-          (u) => u.id !== deleteModal.id
-        )
-      );
+      setUsers((prev) => prev.filter((u) => u.id !== deleteModal.id));
 
       setDeleteModal(null);
     } catch (err) {
@@ -201,17 +165,13 @@ function AdminUsers() {
     <div className="min-h-screen bg-gray-950 text-white px-4 sm:px-6 py-6">
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between mb-6">
-        <h1 className="text-3xl font-bold">
-          👥 Admin Users
-        </h1>
+        <h1 className="text-3xl font-bold">👥 Admin Users</h1>
 
         <input
           type="text"
           placeholder="Search user..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={(e) => setSearch(e.target.value)}
           className="px-4 py-3 rounded-xl bg-gray-900 border border-white/10 outline-none w-full lg:w-96"
         />
       </div>
@@ -219,27 +179,19 @@ function AdminUsers() {
       {/* STATS */}
       <div className="grid md:grid-cols-3 gap-4 mb-7">
         <div className="bg-gray-900 p-5 rounded-2xl">
-          <p className="text-gray-400 text-sm">
-            👥 Total Users
-          </p>
-          <h2 className="text-4xl font-bold mt-2">
-            {totalUsers}
-          </h2>
+          <p className="text-gray-400 text-sm">👥 Total Users</p>
+          <h2 className="text-4xl font-bold mt-2">{totalUsers}</h2>
         </div>
 
         <div className="bg-gray-900 p-5 rounded-2xl">
-          <p className="text-gray-400 text-sm">
-            🛡️ Admins
-          </p>
+          <p className="text-gray-400 text-sm">🛡️ Admins</p>
           <h2 className="text-4xl font-bold mt-2 text-purple-400">
             {totalAdmins}
           </h2>
         </div>
 
         <div className="bg-gray-900 p-5 rounded-2xl">
-          <p className="text-gray-400 text-sm">
-            🛒 Customers
-          </p>
+          <p className="text-gray-400 text-sm">🛒 Customers</p>
           <h2 className="text-4xl font-bold mt-2 text-green-400">
             {totalCustomers}
           </h2>
@@ -261,13 +213,9 @@ function AdminUsers() {
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-semibold">
-                    {user.name}
-                  </h2>
+                  <h2 className="text-xl font-semibold">{user.name}</h2>
 
-                  <p className="text-gray-300">
-                    {user.email}
-                  </p>
+                  <p className="text-gray-300">{user.email}</p>
 
                   <p className="text-sm text-gray-400">
                     📞 {user.phone || "No phone"}
@@ -282,46 +230,28 @@ function AdminUsers() {
               {/* CENTER */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-800 p-3 rounded-xl">
-                  <p className="text-xs text-gray-400">
-                    Orders
-                  </p>
-                  <h3 className="font-bold">
-                    {user.totalOrders || 0}
-                  </h3>
+                  <p className="text-xs text-gray-400">Orders</p>
+                  <h3 className="font-bold">{user.totalOrders || 0}</h3>
                 </div>
 
                 <div className="bg-gray-800 p-3 rounded-xl">
-                  <p className="text-xs text-gray-400">
-                    Spent
-                  </p>
-                  <h3 className="font-bold">
-                    ₹{user.totalSpent || 0}
-                  </h3>
+                  <p className="text-xs text-gray-400">Spent</p>
+                  <h3 className="font-bold">₹{user.totalSpent || 0}</h3>
                 </div>
 
                 <div className="bg-gray-800 p-3 rounded-xl">
-                  <p className="text-xs text-gray-400">
-                    Role
-                  </p>
-                  <h3 className="font-bold">
-                    {user.role}
-                  </h3>
+                  <p className="text-xs text-gray-400">Role</p>
+                  <h3 className="font-bold">{user.role}</h3>
                 </div>
 
                 <div className="bg-gray-800 p-3 rounded-xl">
-                  <p className="text-xs text-gray-400">
-                    Status
-                  </p>
+                  <p className="text-xs text-gray-400">Status</p>
                   <h3
                     className={`font-bold ${
-                      user.blocked
-                        ? "text-red-400"
-                        : "text-green-400"
+                      user.blocked ? "text-red-400" : "text-green-400"
                     }`}
                   >
-                    {user.blocked
-                      ? "Blocked"
-                      : "Active"}
+                    {user.blocked ? "Blocked" : "Active"}
                   </h3>
                 </div>
               </div>
@@ -329,9 +259,7 @@ function AdminUsers() {
               {/* RIGHT */}
               <div className="flex flex-wrap gap-2 lg:justify-end">
                 <button
-                  onClick={() =>
-                    navigate(`/admin/users/${user.id}`)
-                  }
+                  onClick={() => navigate(`/admin/users/${user.id}`)}
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700"
                 >
                   Profile
@@ -341,10 +269,7 @@ function AdminUsers() {
                   onClick={() =>
                     setRoleModal({
                       id: user.id,
-                      role:
-                        user.role === "ADMIN"
-                          ? "USER"
-                          : "ADMIN",
+                      role: user.role === "ADMIN" ? "USER" : "ADMIN",
                       name: user.name,
                     })
                   }
@@ -354,21 +279,13 @@ function AdminUsers() {
                 </button>
 
                 <button
-                  disabled={
-                    processingId === user.id
-                  }
-                  onClick={() =>
-                    toggleBlock(user)
-                  }
+                  disabled={processingId === user.id}
+                  onClick={() => toggleBlock(user)}
                   className={`px-4 py-2 rounded-xl ${
-                    user.blocked
-                      ? "bg-green-600"
-                      : "bg-yellow-600"
+                    user.blocked ? "bg-green-600" : "bg-yellow-600"
                   }`}
                 >
-                  {user.blocked
-                    ? "Unblock"
-                    : "Block"}
+                  {user.blocked ? "Unblock" : "Block"}
                 </button>
 
                 <button
@@ -392,35 +309,20 @@ function AdminUsers() {
       {profileModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4">
-              👤 User Profile
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">👤 User Profile</h2>
 
             <div className="space-y-2 text-gray-300">
               <p>Name: {profileModal.name}</p>
               <p>Email: {profileModal.email}</p>
               <p>Phone: {profileModal.phone}</p>
               <p>Role: {profileModal.role}</p>
-              <p>
-                Joined:{" "}
-                {formatDate(
-                  profileModal.createdAt
-                )}
-              </p>
-              <p>
-                Orders:{" "}
-                {profileModal.totalOrders}
-              </p>
-              <p>
-                Total Spent: ₹
-                {profileModal.totalSpent}
-              </p>
+              <p>Joined: {formatDate(profileModal.createdAt)}</p>
+              <p>Orders: {profileModal.totalOrders}</p>
+              <p>Total Spent: ₹{profileModal.totalSpent}</p>
             </div>
 
             <button
-              onClick={() =>
-                setProfileModal(null)
-              }
+              onClick={() => setProfileModal(null)}
               className="mt-5 px-4 py-2 bg-gray-700 rounded-xl"
             >
               Close
@@ -433,21 +335,15 @@ function AdminUsers() {
       {roleModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-3">
-              Change Role
-            </h2>
+            <h2 className="text-xl font-bold mb-3">Change Role</h2>
 
             <p className="text-gray-300 mb-5">
-              Change{" "}
-              <b>{roleModal.name}</b> to{" "}
-              <b>{roleModal.role}</b> ?
+              Change <b>{roleModal.name}</b> to <b>{roleModal.role}</b> ?
             </p>
 
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() =>
-                  setRoleModal(null)
-                }
+                onClick={() => setRoleModal(null)}
                 className="px-4 py-2 bg-gray-700 rounded-xl"
               >
                 Cancel
@@ -468,20 +364,15 @@ function AdminUsers() {
       {deleteModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold text-red-400 mb-3">
-              Delete User
-            </h2>
+            <h2 className="text-xl font-bold text-red-400 mb-3">Delete User</h2>
 
             <p className="text-gray-300 mb-5">
-              Delete{" "}
-              <b>{deleteModal.name}</b> ?
+              Delete <b>{deleteModal.name}</b> ?
             </p>
 
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() =>
-                  setDeleteModal(null)
-                }
+                onClick={() => setDeleteModal(null)}
                 className="px-4 py-2 bg-gray-700 rounded-xl"
               >
                 Cancel

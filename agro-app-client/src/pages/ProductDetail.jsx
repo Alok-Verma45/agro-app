@@ -80,7 +80,7 @@ function ProductDetail() {
     return path;
   }
 
-  return `http://localhost:8080${path}`;
+  return `${import.meta.env.VITE_API_BASE_URL}${path}`;
 };
 
   // =========================
