@@ -18,13 +18,16 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     private BigDecimal totalAmount;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<CartItem> items;
 }

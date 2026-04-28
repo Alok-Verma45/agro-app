@@ -1,7 +1,6 @@
 package com.alok.agroapp.entity;
 
-import com.alok.agroapp.entity.Cart;
-import com.alok.agroapp.entity.Product;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,9 +20,10 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
+    @JsonBackReference
     private Cart cart;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Product product;
 
