@@ -24,7 +24,7 @@ public class Order {
     // =========================
     // USER
     // =========================
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -87,7 +87,9 @@ public class Order {
     // =========================
     @OneToMany(
             mappedBy = "order",
-            cascade = CascadeType.ALL
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
     )
     private List<OrderItem> items;
 

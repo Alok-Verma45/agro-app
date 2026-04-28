@@ -127,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
             );
         }
 
-        orderRepository.save(order);
+        orderRepository.saveAndFlush(order);
 
         // CLEAR CART
         cart.getItems().clear();
@@ -140,6 +140,7 @@ public class OrderServiceImpl implements OrderService {
     // USER ORDERS
     // ==========================================
     @Override
+    @Transactional(readOnly = true)
     public List<OrderResponse> getMyOrders() {
 
         String email = SecurityContextHolder
@@ -160,6 +161,7 @@ public class OrderServiceImpl implements OrderService {
     // ADMIN ORDERS
     // ==========================================
     @Override
+    @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders() {
         return mapOrdersToResponse(
                 orderRepository.findAll()
@@ -170,6 +172,7 @@ public class OrderServiceImpl implements OrderService {
     // ORDER BY ID
     // ==========================================
     @Override
+    @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id) {
 
         String email = SecurityContextHolder
