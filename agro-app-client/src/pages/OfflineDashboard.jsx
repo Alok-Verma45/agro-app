@@ -81,7 +81,7 @@ function OfflineDashboard() {
     },
     {
       label: "📦 Add Product",
-      onClick: () => navigate("/products"),
+      onClick: () => navigate("/admin/products"),
     },
     {
       label: "🧾 Billing",
