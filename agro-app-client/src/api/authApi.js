@@ -1,21 +1,21 @@
-import axios from "axios";
-
-const API = "http://localhost:8080/api/auth"; 
+import API from "./axios";
 
 // 🔐 LOGIN
 export const loginUser = (data) => {
-  return axios.post(`${API}/login`, data);
+  return API.post("/auth/login", data);
 };
 
 // 🆕 SIGNUP
 export const signupUser = (data) => {
-  return axios.post(`${API}/register`, data);
+  return API.post("/auth/register", data);
 };
 
+// 📩 FORGOT PASSWORD
 export const forgotPassword = (data) => {
-  return axios.post(`${API}/forgot-password`, data);
+  return API.post("/auth/forgot-password", data);
 };
 
+// 🔁 RESET PASSWORD
 export const resetPassword = (data) => {
-  return axios.post(`${API}/reset-password`, data);
+  return API.post("/auth/reset-password", data);
 };

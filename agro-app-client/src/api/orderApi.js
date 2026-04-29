@@ -1,36 +1,21 @@
-import axios from "axios";
+import API from "./axios";
 
-const API = "http://localhost:8080/api/orders";
-
-const getAuthHeader = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
-
+// 🛒 PLACE ORDER
 export const placeOrder = (data) =>
-  axios.post(`${API}/place`, data, {
-    headers: getAuthHeader(),
-  });
+  API.post("/orders/place", data);
 
+// 📦 MY ORDERS
 export const getMyOrders = () =>
-  axios.get(`${API}/my`, {
-    headers: getAuthHeader(),
-  });
+  API.get("/orders/my");
 
+// 🔍 ORDER DETAILS
 export const getOrderById = (id) =>
-  axios.get(`${API}/${id}`, {
-    headers: getAuthHeader(),
-  });
+  API.get(`/orders/${id}`);
 
+// 🧾 ADMIN ALL ORDERS
 export const getAllOrders = () =>
-  axios.get(`${API}/all`, {
-    headers: getAuthHeader(),
-  });
+  API.get("/orders/all");
 
+// 🔄 UPDATE STATUS
 export const updateOrderStatus = (id, status) =>
-  axios.put(
-    `${API}/${id}/status?status=${status}`,
-    {},
-    {
-      headers: getAuthHeader(),
-    }
-  );
+  API.put(`/orders/${id}/status?status=${status}`);

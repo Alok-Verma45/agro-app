@@ -28,16 +28,16 @@ function Home() {
   // IMAGE URL
   // =====================================
   const getImageUrl = (path) => {
-  if (!path) {
-    return "https://via.placeholder.com/400x300?text=No+Image";
-  }
+    if (!path) {
+      return "https://via.placeholder.com/400x300?text=No+Image";
+    }
 
-  if (path.startsWith("http")) {
-    return path;
-  }
+    if (path.startsWith("http")) {
+      return path;
+    }
 
-  return `http://localhost:8080${path}`;
-};
+    return `${import.meta.env.VITE_API_BASE_URL}${path}`;
+  };
 
   // =====================================
   // ADD TO CART
@@ -64,10 +64,12 @@ function Home() {
   // FILTER
   // =====================================
   const filteredProducts = products.filter((p) => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (p.name || "")
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
     const matchCategory =
-      selectedCategory === "All" || p.category === selectedCategory;
+      selectedCategory === "All" || (p.category || "") === selectedCategory;
 
     return matchSearch && matchCategory;
   });

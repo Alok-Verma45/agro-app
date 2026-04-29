@@ -67,7 +67,7 @@ function OnlineDashboard() {
     },
     {
       label: "📦 Products",
-      onClick: () => navigate("/products"),
+      onClick: () => navigate("/admin/products"),
     },
   ];
 

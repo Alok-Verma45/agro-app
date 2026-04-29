@@ -1,41 +1,19 @@
-import axios from "axios";
-
-const API = "http://localhost:8080/api/admin/users";
-
-// ======================
-// AUTH HEADER
-// ======================
-const getAuthHeader = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+import API from "./axios";
 
 // ======================
 // GET ALL USERS
 // ======================
-export const getAllUsers = () => {
-  return axios.get(API, {
-    headers: getAuthHeader(),
-  });
-};
+export const getAllUsers = () =>
+  API.get("/admin/users");
 
 // ======================
 // UPDATE ROLE
 // ======================
-export const updateUserRole = (id, role) => {
-  return axios.put(
-    `${API}/${id}/role?role=${role}`,
-    {},
-    {
-      headers: getAuthHeader(),
-    }
-  );
-};
+export const updateUserRole = (id, role) =>
+  API.put(`/admin/users/${id}/role?role=${role}`);
 
 // ======================
 // DELETE USER
 // ======================
-export const deleteUser = (id) => {
-  return axios.delete(`${API}/${id}`, {
-    headers: getAuthHeader(),
-  });
-};
+export const deleteUser = (id) =>
+  API.delete(`/admin/users/${id}`);
