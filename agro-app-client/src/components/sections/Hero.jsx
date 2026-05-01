@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 function Hero() {
+
+    const navigate = useNavigate(); 
   return (
     <section
       className="
@@ -43,28 +46,30 @@ function Hero() {
           </p>
 
           {/* buttons */}
-          <div className="mt-5 flex gap-3">
-            <a
-              href="#products"
+          <div className="mt-5 flex gap-3 flex-wrap">
+            {/* PRIMARY CTA */}
+            <button
+              onClick={() => navigate("/products")}
               className="
-                px-5 py-2.5 rounded-xl
-                bg-white text-green-700 font-semibold
-                hover:scale-105 transition
-              "
+      px-6 py-3 rounded-xl
+      bg-white text-green-700 font-semibold
+      hover:scale-105 transition
+    "
             >
-              Shop Now
-            </a>
+              Start Shopping →
+            </button>
 
-            <a
-              href="#products"
+            {/* SECONDARY CTA */}
+            <button
+              onClick={() => navigate("/advice")}
               className="
-                px-5 py-2.5 rounded-xl
-                border border-white/40
-                hover:bg-white/10 transition
-              "
+      px-6 py-3 rounded-xl
+      border border-white/40
+      hover:bg-white/10 transition
+    "
             >
-              Explore
-            </a>
+              🌱 Get Crop Advice
+            </button>
           </div>
         </div>
 
