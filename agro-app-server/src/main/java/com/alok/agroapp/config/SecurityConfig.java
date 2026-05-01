@@ -116,6 +116,8 @@ public class SecurityConfig {
                                 "/products/**"
                         ).permitAll()
 
+                        .requestMatchers("/api/ai/**").permitAll()
+
                         // ===============================
                         // HOME
                         // ===============================
