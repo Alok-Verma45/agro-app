@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
+import UserProfile from "../pages/UserProfile";
 import Home from "../pages/Home";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
@@ -63,6 +64,7 @@ function AppRoutes() {
       {/* MAIN LAYOUT */}
       <Route element={<MainLayout />}>
         {/* ================= USER ROUTES ================= */}
+        <Route path="/profile" element={<UserProfile />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />

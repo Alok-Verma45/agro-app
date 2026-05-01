@@ -1,19 +1,28 @@
 import API from "./axios";
 
 // ======================
-// GET ALL USERS
+// ADMIN APIs
 // ======================
-export const getAllUsers = () =>
-  API.get("/admin/users");
+export const adminApi = {
+
+  getAllUsers: () => API.get("/admin/users"),
+
+  updateUserRole: (id, role) =>
+    API.put(`/admin/users/${id}/role?role=${role}`),
+
+  deleteUser: (id) =>
+    API.delete(`/admin/users/${id}`),
+
+};
 
 // ======================
-// UPDATE ROLE
+// USER APIs
 // ======================
-export const updateUserRole = (id, role) =>
-  API.put(`/admin/users/${id}/role?role=${role}`);
+export const userApi = {
 
-// ======================
-// DELETE USER
-// ======================
-export const deleteUser = (id) =>
-  API.delete(`/admin/users/${id}`);
+  getProfile: () => API.get("/users/me"),
+
+  updateProfile: (data) =>
+    API.put("/users/me", data),
+
+};

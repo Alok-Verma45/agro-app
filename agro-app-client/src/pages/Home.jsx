@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import Hero from "../components/sections/Hero";
 import { getProducts } from "../api/productApi";
 import { addToCart } from "../api/cartApi";
 
@@ -85,48 +87,7 @@ function Home() {
     >
       <div className="w-full px-3 sm:px-5 lg:px-6 py-6">
         {/* HERO */}
-        <section
-          className="
-          rounded-3xl
-          bg-gradient-to-r from-green-500 to-emerald-600
-          p-8 md:p-12 mb-10
-          text-white
-        "
-        >
-          <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-              🌱 आपका डिजिटल कृषि साथी
-            </h1>
-
-            <p className="mt-4 text-lg text-green-50">
-              Best seeds, fertilizers and farming products for every farmer.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href="#products"
-                className="
-                px-6 py-3 rounded-xl
-                bg-white text-green-700
-                font-semibold hover:bg-gray-100
-              "
-              >
-                Shop Now
-              </a>
-
-              <a
-                href="#products"
-                className="
-                px-6 py-3 rounded-xl
-                border border-white/40
-                hover:bg-white/10
-              "
-              >
-                Explore Products
-              </a>
-            </div>
-          </div>
-        </section>
+        <Hero />
 
         {/* SEARCH */}
         <section className="mb-6">
@@ -176,84 +137,121 @@ function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="
-                bg-white dark:bg-slate-900
-                border border-gray-200 dark:border-white/5
-                rounded-2xl overflow-hidden
-                shadow-sm dark:shadow-none
-                hover:border-green-500/40
-                transition
-              "
-              >
-                {/* IMAGE */}
-                <div
-                  className="
-                  h-48
-                  bg-gray-100 dark:bg-slate-800
-                  overflow-hidden
-                "
-                >
-                  <img
-                    src={getImageUrl(product.imageUrl)}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/400x300?text=No+Image";
-                    }}
-                  />
-                </div>
+  <div
+    key={product.id}
+    className="
+      group
+      bg-white dark:bg-slate-900
+      border border-gray-200 dark:border-white/10
+      rounded-2xl overflow-hidden
+      transition-all duration-300
+      hover:shadow-xl hover:-translate-y-1
+    "
+  >
+    {/* IMAGE */}
+    <div className="relative h-44 bg-gray-100 dark:bg-slate-800 overflow-hidden">
+      <img
+        src={getImageUrl(product.imageUrl)}
+        alt={product.name}
+        className="
+          w-full h-full object-cover
+          transition-transform duration-500
+          group-hover:scale-110
+        "
+        onError={(e) => {
+          e.target.src =
+            "https://via.placeholder.com/400x300?text=No+Image";
+        }}
+      />
 
-                {/* CONTENT */}
-                <div className="p-5">
-                  <h3 className="text-xl font-semibold">{product.name}</h3>
+      {/* TOP BADGE */}
+      <div className="absolute top-3 left-3">
+        <span
+          className="
+            px-2.5 py-1 rounded-full text-[11px] font-medium
+            bg-white/80 dark:bg-black/40 backdrop-blur
+            text-gray-800 dark:text-white
+            border border-white/20
+          "
+        >
+          {product.category || "General"}
+        </span>
+      </div>
 
-                  <p
-                    className="
-                    mt-2 text-sm min-h-[40px]
-                    text-gray-600 dark:text-gray-400
-                    line-clamp-2
-                  "
-                  >
-                    {product.description || "High quality agriculture product."}
-                  </p>
+      {/* STOCK BADGE */}
+      <div className="absolute top-3 right-3">
+        <span
+          className={`
+            px-2.5 py-1 rounded-full text-[11px] font-medium
+            backdrop-blur border
+            ${
+              product.quantity > 0
+                ? "bg-green-500/20 text-green-600 border-green-400/30"
+                : "bg-red-500/20 text-red-500 border-red-400/30"
+            }
+          `}
+        >
+          {product.quantity > 0 ? "In Stock" : "Out"}
+        </span>
+      </div>
+    </div>
 
-                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                    Stock: {product.quantity}
-                  </p>
+    {/* CONTENT */}
+    <div className="p-4">
+      {/* NAME */}
+      <h3 className="font-semibold text-base line-clamp-1">
+        {product.name}
+      </h3>
 
-                  <p className="mt-2 text-2xl font-bold text-green-500">
-                    ₹{product.price}
-                  </p>
+      {/* DESC */}
+      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[32px]">
+        {product.description || "High quality agriculture product."}
+      </p>
 
-                  <div className="grid grid-cols-2 gap-3 mt-5">
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="
-                      text-center py-2 rounded-xl
-                      bg-blue-600 hover:bg-blue-700
-                      text-white
-                    "
-                    >
-                      Details
-                    </Link>
+      {/* PRICE + STOCK */}
+      <div className="mt-3 flex items-center justify-between">
+        <p className="text-xl font-bold text-green-600">
+          ₹{product.price}
+        </p>
 
-                    <button
-                      onClick={() => handleAddToCart(product.id)}
-                      className="
-                      py-2 rounded-xl
-                      bg-green-600 hover:bg-green-700
-                      text-white
-                    "
-                    >
-                      Add Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+        <p className="text-[11px] text-gray-500">
+          Qty: {product.quantity}
+        </p>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="grid grid-cols-2 gap-2 mt-4">
+        <Link
+          to={`/product/${product.id}`}
+          className="
+            text-center py-2 rounded-lg text-sm
+            bg-gray-100 dark:bg-white/10
+            hover:bg-gray-200 dark:hover:bg-white/20
+            transition
+          "
+        >
+          Details
+        </Link>
+
+        <button
+          onClick={() => handleAddToCart(product.id)}
+          disabled={product.quantity === 0}
+          className={`
+            py-2 rounded-lg text-sm font-medium text-white
+            transition
+            ${
+              product.quantity > 0
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }
+          `}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  </div>
+))}
           </div>
 
           {filteredProducts.length === 0 && (
