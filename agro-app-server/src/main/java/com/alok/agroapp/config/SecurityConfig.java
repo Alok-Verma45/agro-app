@@ -33,40 +33,25 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
-        CorsConfiguration config =
-                new CorsConfiguration();
-
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "https://*.vercel.app"
-        ));
-
-        config.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
-        );
-
-        config.setAllowedHeaders(
-                List.of("*")
-        );
+        CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        // ❌ patterns हटाओ
+        // config.setAllowedOriginPatterns(...)
 
-        source.registerCorsConfiguration(
-                "/**",
-                config
-        );
+        // ✅ exact origins
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://agro-app.vercel.app",
+                "https://agro-app-git-main-alok-verma45s-projects.vercel.app"
+        ));
 
+        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 
