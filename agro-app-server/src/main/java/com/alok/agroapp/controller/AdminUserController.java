@@ -1,6 +1,6 @@
 package com.alok.agroapp.controller;
 
-import com.alok.agroapp.dto.UserResponse;
+import com.alok.agroapp.dto.AdminUserResponse;
 import com.alok.agroapp.entity.enums.Role;
 import com.alok.agroapp.service.AdminUserService;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class AdminUserController {
     // GET ALL USERS
     // =====================================
     @GetMapping
-    public List<UserResponse> getAllUsers() {
+    public List<AdminUserResponse> getAllUsers() {
         return adminUserService.getAllUsers();
     }
 
@@ -31,7 +31,7 @@ public class AdminUserController {
     // GET SINGLE USER
     // =====================================
     @GetMapping("/{id}")
-    public UserResponse getUserById(
+    public AdminUserResponse getUserById(
             @PathVariable Long id
     ) {
         return adminUserService.getUserById(id);

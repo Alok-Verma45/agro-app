@@ -1,25 +1,16 @@
 package com.alok.agroapp.dto;
 
-import lombok.*;
+import com.alok.agroapp.entity.enums.Role;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class UserResponse {
-
     private Long id;
     private String name;
     private String email;
     private String phone;
-    private String role;
-
-    private boolean blocked;
+    private Role role;
     private LocalDateTime createdAt;
-
-    private int totalOrders;
-    private double totalSpent;
 }

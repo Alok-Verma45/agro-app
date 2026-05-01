@@ -1,6 +1,6 @@
 package com.alok.agroapp.service.impl;
 
-import com.alok.agroapp.dto.UserResponse;
+import com.alok.agroapp.dto.AdminUserResponse;
 import com.alok.agroapp.entity.Order;
 import com.alok.agroapp.entity.User;
 import com.alok.agroapp.entity.enums.Role;
@@ -27,11 +27,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     // GET ALL USERS
     // ==========================================
     @Override
-    public List<UserResponse> getAllUsers() {
+    public List<AdminUserResponse> getAllUsers() {
 
         return userRepository.findAll()
                 .stream()
-                .map(this::mapUserResponse)
+                .map(this::mapAdminUserResponse)
                 .toList();
     }
 
@@ -39,13 +39,13 @@ public class AdminUserServiceImpl implements AdminUserService {
     // GET SINGLE USER
     // ==========================================
     @Override
-    public UserResponse getUserById(Long id) {
+    public AdminUserResponse getUserById(Long id) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        return mapUserResponse(user);
+        return mapAdminUserResponse(user);
     }
 
     // ==========================================
@@ -94,7 +94,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     // ==========================================
     // COMMON DTO MAPPER
     // ==========================================
-    private UserResponse mapUserResponse(User user) {
+    private AdminUserResponse mapAdminUserResponse(User user) {
 
         List<Order> orders =
                 orderRepository.findByUser(user);
@@ -107,7 +107,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                                 .doubleValue())
                 .reduce(0.0, Double::sum);
 
-        return UserResponse.builder()
+        return AdminUserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())

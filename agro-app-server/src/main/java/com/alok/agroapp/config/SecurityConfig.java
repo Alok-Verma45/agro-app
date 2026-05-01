@@ -126,6 +126,10 @@ public class SecurityConfig {
                                 "ADMIN"
                         )
 
+                        .requestMatchers(
+                                "/api/users/**"
+                        ).hasAnyRole("USER", "ADMIN")
+
                         // ===============================
                         // PRODUCTS VIEW
                         // ===============================
