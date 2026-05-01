@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 import UserProfile from "../pages/UserProfile";
+import CropAdvice from "../pages/CropAdvice";
 import Home from "../pages/Home";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
@@ -71,6 +72,7 @@ function AppRoutes() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/advice" element={<CropAdvice />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<Orders />} />
