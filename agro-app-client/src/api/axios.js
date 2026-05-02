@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
+  baseURL: "https://agro-app-8787.onrender.com/api"
 });
 
 API.interceptors.request.use((config) => {
