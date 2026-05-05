@@ -10,7 +10,7 @@ function MainLayout() {
 
   const menuSectionTitle = (title) =>
     !collapsed && (
-      <p className="px-3 mb-2 mt-4 text-[11px] uppercase tracking-[2px] text-gray-500 font-semibold">
+      <p className="px-3 mb-2 mt-4 text-[11px] uppercase tracking-[2px] text-gray-500 dark:text-gray-400 font-semibold">
         {title}
       </p>
     );
@@ -27,20 +27,17 @@ function MainLayout() {
         ? `
           bg-gradient-to-r from-green-500/20 to-emerald-500/10
           border border-green-400/30
-          text-green-400
+          text-green-500 dark:text-green-400
           shadow-lg shadow-green-500/10
         `
         : `
-          text-gray-300
-          hover:bg-white/5
-          hover:text-white
+          text-gray-700 dark:text-gray-300
+          hover:bg-gray-200 dark:hover:bg-white/5
+          hover:text-black dark:hover:text-white
         `
     }
   `;
 
-  // ======================
-  // MENU DATA
-  // ======================
   const offlineMenu = [
     { to: "/dashboard", icon: "📊", label: "Offline Dashboard" },
     { to: "/customers", icon: "👥", label: "Customers" },
@@ -49,17 +46,15 @@ function MainLayout() {
   ];
 
   const onlineMenu = [
-    {
-      to: "/admin/online-dashboard",
-      icon: "🌐",
-      label: "Online Dashboard",
-    },
+    { to: "/admin/online-dashboard", icon: "🌐", label: "Online Dashboard" },
     { to: "/admin/products", icon: "📦", label: "Products" },
     { to: "/admin/users", icon: "🧑‍💼", label: "Users" },
     { to: "/admin/orders", icon: "📬", label: "Orders" },
   ];
 
-  const inventoryMenu = [{ to: "/inventory", icon: "📋", label: "Stock List" }];
+  const inventoryMenu = [
+    { to: "/inventory", icon: "📋", label: "Stock List" },
+  ];
 
   const settingsMenu = [
     { to: "/reports", icon: "📈", label: "Reports" },
@@ -87,7 +82,7 @@ function MainLayout() {
             hidden md:block absolute left-full ml-3
             px-3 py-1.5 rounded-xl
             text-xs whitespace-nowrap
-            bg-black text-white
+            bg-black text-white dark:bg-black
             opacity-0 group-hover:opacity-100
             translate-x-2 group-hover:translate-x-0
             transition-all duration-200
@@ -102,6 +97,7 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-[#020617] text-gray-900 dark:text-white transition-colors duration-300">
+      
       {/* NAVBAR */}
       <Navbar
         toggleSidebar={
@@ -110,10 +106,11 @@ function MainLayout() {
       />
 
       <div className="flex flex-1 relative">
+        
         {/* MOBILE OVERLAY */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
+            className="fixed inset-0 bg-black/40 dark:bg-black/50 backdrop-blur-sm z-30 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -122,34 +119,32 @@ function MainLayout() {
         {role === "ADMIN" && (
           <aside
             className={`
-    fixed md:static top-0 left-0 z-40 h-full
+              fixed md:static top-0 left-0 z-40 h-full
+              ${collapsed ? "w-20" : "w-72 xl:w-80"}
+              
+              bg-white dark:bg-gradient-to-b dark:from-[#0f172a] dark:via-[#081226] dark:to-[#020617]
 
-    ${collapsed ? "w-20" : "w-72 xl:w-80"}
+              border-r border-gray-200 dark:border-white/10
+              shadow-2xl
+              transition-all duration-300
+              overflow-y-auto
 
-    bg-gradient-to-b
-    from-[#0f172a]
-    via-[#081226]
-    to-[#020617]
-
-    border-r border-white/10
-    shadow-2xl
-    transition-all duration-300
-    overflow-y-auto
-
-    ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-    md:translate-x-0
-  `}
+              ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+              md:translate-x-0
+            `}
           >
+            
             {/* HEADER */}
-            <div className="sticky top-0 z-10 backdrop-blur-xl bg-[#0f172a]/85 border-b border-white/10 px-4 py-4">
+            <div className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 dark:bg-[#0f172a]/85 border-b border-gray-200 dark:border-white/10 px-4 py-4">
               <div className="flex items-center justify-between">
+                
                 {!collapsed ? (
                   <div>
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
                       ⚙️ Management
                     </h2>
 
-                    <p className="text-xs text-gray-400 mt-1 tracking-wide">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 tracking-wide">
                       Premium Admin Panel
                     </p>
                   </div>
@@ -159,7 +154,7 @@ function MainLayout() {
 
                 <button
                   onClick={() => setCollapsed(!collapsed)}
-                  className="hidden md:flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition"
+                  className="hidden md:flex items-center justify-center w-9 h-9 rounded-xl bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 transition"
                 >
                   {collapsed ? "➡️" : "⬅️"}
                 </button>
@@ -168,32 +163,29 @@ function MainLayout() {
 
             {/* BODY */}
             <div className="p-2.5 pb-8">
-              {/* OFFLINE */}
+              
               {menuSectionTitle("🏪 Offline Business")}
               <div className="space-y-1.5">{renderMenu(offlineMenu)}</div>
 
-              {/* ONLINE */}
               {menuSectionTitle("🌐 Online Store")}
               <div className="space-y-1.5 mt-3">{renderMenu(onlineMenu)}</div>
 
-              {/* INVENTORY */}
               {menuSectionTitle("📦 Inventory")}
               <div className="space-y-1.5 mt-3">
                 {renderMenu(inventoryMenu)}
               </div>
 
-              {/* SETTINGS */}
               {menuSectionTitle("⚡ Admin Tools")}
               <div className="space-y-1.5 mt-3">{renderMenu(settingsMenu)}</div>
 
               {/* BUSINESS CARD */}
               {!collapsed && (
-                <div className="mt-5 p-4 rounded-3xl border border-green-400/10 bg-gradient-to-r from-green-500/10 to-emerald-500/5">
-                  <p className="text-green-400 font-semibold text-sm">
+                <div className="mt-5 p-4 rounded-3xl border border-green-400/20 bg-green-50 dark:bg-gradient-to-r dark:from-green-500/10 dark:to-emerald-500/5">
+                  <p className="text-green-600 dark:text-green-400 font-semibold text-sm">
                     🚀 Business Tip
                   </p>
 
-                  <p className="text-xs text-gray-300 mt-2 leading-5">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-2 leading-5">
                     Separate offline + online modules improve analytics,
                     workflow and scale.
                   </p>
@@ -213,8 +205,8 @@ function MainLayout() {
             <div
               className="
               rounded-3xl
-              border border-white/5
-              bg-white/[0.02]
+              border border-gray-200 dark:border-white/5
+              bg-white dark:bg-white/[0.02]
               backdrop-blur-sm
               min-h-[calc(100vh-120px)]
               p-4 sm:p-6
